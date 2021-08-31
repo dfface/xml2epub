@@ -29,8 +29,8 @@ except ImportError:
 import jinja2
 
 # Local modules
-import chapter
-import constants
+from . import chapter
+from . import constants
 
 
 def get_cover_image_path(html_string):

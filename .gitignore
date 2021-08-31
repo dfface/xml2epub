@@ -1,2 +1,4 @@
-.vscode/*
-xml2epub/__pycache__
+build
+dist
+venv
+xml2epub.egg-info

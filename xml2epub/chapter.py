@@ -18,7 +18,7 @@ import bs4
 from bs4 import BeautifulSoup
 
 # Local modules
-import clean
+from . import clean
 
 
 class NoUrlError(Exception):

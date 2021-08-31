@@ -9,7 +9,7 @@ import bs4
 from bs4 import BeautifulSoup
 
 # Local modules
-import constants
+from . import constants
 
 
 def create_html_from_fragment(tag):
