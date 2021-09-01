@@ -40,8 +40,10 @@ def get_cover_image_path(html_string):
         cover_include = False
         first_img = root.find('img')
         for cover_title in constants.COVER_TITLE_LIST:
+            # 如果章节标题包含 封面 二字
             if first_img is not None and title == cover_title:
                 cover_include = True
+            # 如果第一张图的src 或 href 包含 封面 二字
             if first_img is not None and re.match(r'.*({}).*'.format(cover_title), first_img['href'],
                                                   re.I) is not None:
                 cover_include = True
@@ -104,6 +106,9 @@ class _EpubFile():
         if 'cover_image' in parameter_lists.keys():
             self.non_chapter_parameters['cover_image'] = parameter_lists['cover_image']
             parameter_lists.pop('cover_image')
+        if 'css' in parameter_lists.keys():
+            self.non_chapter_parameters['css'] = parameter_lists['css']
+            parameter_lists.pop('css')
 
         def check_list_lengths(lists):
             list_length = None
@@ -160,11 +165,10 @@ class TocNcx(_EpubFile):
     Epub的 XML的导航控制文件(toc.ncx) 类 
     """
 
-    def __init__(self,
-                 template_file=os.path.join(
-                     constants.EPUB_TEMPLATES_DIR, 'toc_ncx.xml'),
-                 **non_chapter_parameters):
-        super(TocNcx, self).__init__(template_file, **non_chapter_parameters)
+    def __init__(self, title='', uid=''):
+        super(TocNcx, self).__init__(template_file=os.path.join(constants.EPUB_TEMPLATES_DIR, 'toc_ncx.xml'),
+                                     title=title,
+                                     uid=uid)
 
     def add_chapters(self, chapter_list):
         id_list = range(len(chapter_list))
@@ -190,7 +194,7 @@ class ContentOpf(_EpubFile):
     Epub的 .opf 类, 包含文件清单和文件阅读顺序等.
     """
 
-    def __init__(self, title, creator='', language='', rights='', publisher='', uid='', date=time.strftime("%m-%d-%Y")):
+    def __init__(self, title, creator='', language='', rights='', publisher='', uid='', date=time.strftime("%Y-%m-%d")):
         super(ContentOpf, self).__init__(os.path.join(constants.EPUB_TEMPLATES_DIR, 'opf.xml'),
                                          title=title,
                                          creator=creator,
@@ -207,11 +211,21 @@ class ContentOpf(_EpubFile):
             cover_path = get_cover_image_path(chapter_list[i].content)
             if cover_path is not None:
                 cover_image = cover_path
+        # 如果第一张图的属性的 class 为 fullscreen
+        first_chapter = BeautifulSoup(chapter_list[0].content, 'html.parser')
+        if first_chapter.find('img')['class'] is not None and 'fullscreen' in first_chapter.find('img')['class']:
+            cover_image = first_chapter.find('img')['src']
+        # 整理 css ，去重
+        css = []
+        for c in chapter_list:
+            for s in c.css:
+                if s not in css:
+                    css.append(s)
         # 添加 items
         id_list = range(len(chapter_list))
         link_list = [str(n) + '.xhtml' for n in id_list]
         imgs_list = [c.imgs for c in chapter_list]
-        super(ContentOpf, self).add_chapters(cover_image=cover_image,
+        super(ContentOpf, self).add_chapters(cover_image=cover_image, css=css,
                                              **{'id': id_list, 'link': link_list, "imgs": imgs_list})
 
     def get_content_as_element(self):
@@ -251,7 +265,9 @@ class Epub():
         self.current_chapter_number = None
         self._increase_current_chapter_number()
         self.toc_html = TocHtml()
-        self.toc_ncx = TocNcx()
+        self.toc_ncx = TocNcx(
+            self.title, self.uid
+        )
         self.opf = ContentOpf(
             self.title, self.creator, self.language, self.rights, self.publisher, self.uid)
         self.minetype = _Mimetype(self.EPUB_DIR)
@@ -269,10 +285,13 @@ class Epub():
         self.OEBPS_DIR = os.path.join(self.EPUB_DIR, 'OEBPS')
         self.META_INF_DIR = os.path.join(self.EPUB_DIR, 'META-INF')
         self.LOCAL_IMAGE_DIR = 'images'
+        self.LOCAL_CSS_DIR = 'css'
         self.IMAGE_DIR = os.path.join(self.OEBPS_DIR, self.LOCAL_IMAGE_DIR)
+        self.CSS_DIR = os.path.join(self.OEBPS_DIR, self.LOCAL_CSS_DIR)
         os.makedirs(self.OEBPS_DIR)
         os.makedirs(self.META_INF_DIR)
         os.makedirs(self.IMAGE_DIR)
+        os.makedirs(self.CSS_DIR)
 
     def _increase_current_chapter_number(self):
         """
@@ -303,6 +322,7 @@ class Epub():
         chapter_file_output = os.path.join(
             self.OEBPS_DIR, self.current_chapter_path)
         c._replace_images_in_chapter(self.OEBPS_DIR)
+        c._replace_css_in_chapter(self.OEBPS_DIR)
         c.write(chapter_file_output)
         self._increase_current_chapter_number()
         self.chapters.append(c)

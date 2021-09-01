@@ -26,12 +26,12 @@ class NoUrlError(Exception):
         return 'Chapter instance URL attribute is None'
 
 
-class ImageErrorException(Exception):
-    def __init__(self, image_url):
-        self.image_url = image_url
+class ResourceErrorException(Exception):
+    def __init__(self, url):
+        self.url = url
 
     def __str__(self):
-        return 'Error downloading image from ' + self.image_url
+        return 'Error downloading resource from ' + self.url
 
 
 def get_image_type(url):
@@ -61,6 +61,51 @@ def get_image_type(url):
             return None
 
 
+def download_resource(url, path):
+    """
+    下载资源，包装 requests
+    :param url: 资源完整链接
+    :param path: 资源完整保存地址
+    :return:
+    """
+    # 文件大小
+    size = 0
+    # 请求次数
+    num = 0
+    while size == 0:
+        try:
+            # urllib.urlretrieve(image_url, full_image_file_name)
+            with open(path, 'wb') as f:
+                user_agent = r'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36'
+                request_headers = {'User-Agent': user_agent}
+                requests_object = requests.get(url, headers=request_headers)
+                try:
+                    content = requests_object.content
+                    # Check for empty response
+                    f.write(content)
+                except AttributeError:
+                    raise ResourceErrorException(url)
+        except IOError:
+            raise ResourceErrorException(url)
+        # 判断是否正确保存
+        size = os.path.getsize(path)
+        if size == 0:
+            os.remove(path)
+        # 如果获取超过十次则跳过
+        num += 1
+        if num >= 10:
+            break
+
+
+def save_css(css_url, css_directory, css_name):
+    full_css_path = os.path.join(css_directory, css_name + '.css')
+    # 如果存在则什么也不做
+    if os.path.exists(full_css_path):
+        return
+    # 否则请求下载
+    download_resource(css_url, full_css_path)
+
+
 def save_image(image_url, image_directory, image_name):
     """
     保存在线图片到指定的路径, 可自定义文件名.
@@ -71,14 +116,14 @@ def save_image(image_url, image_directory, image_name):
         image_name (str): image的文件名(无后缀).
 
     Raises:
-        ImageErrorException: 在无法保存该图片时触发该 Error.
+        ResourceErrorException: 在无法保存该图片时触发该 Error.
 
     Returns:
         str: 图片的类型.
     """
     image_type = get_image_type(image_url)
     if image_type is None:
-        raise ImageErrorException(image_url)
+        raise ResourceErrorException(image_url)
     full_image_file_name = os.path.join(
         image_directory, image_name + '.' + image_type)
 
@@ -86,34 +131,35 @@ def save_image(image_url, image_directory, image_name):
     if os.path.exists(image_url):
         shutil.copy(image_url, full_image_file_name)
         return image_type
-    # 图片大小
-    size = 0
-    # 请求次数
-    num = 0
-    while size == 0:
-        try:
-            # urllib.urlretrieve(image_url, full_image_file_name)
-            with open(full_image_file_name, 'wb') as f:
-                user_agent = r'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36'
-                request_headers = {'User-Agent': user_agent}
-                requests_object = requests.get(image_url, headers=request_headers)
-                try:
-                    content = requests_object.content
-                    # Check for empty response
-                    f.write(content)
-                except AttributeError:
-                    raise ImageErrorException(image_url)
-        except IOError:
-            raise ImageErrorException(image_url)
-        # 判断是否正确保存图片
-        size = os.path.getsize(full_image_file_name)
-        if size == 0:
-            os.remove(full_image_file_name)
-        # 如果该图片获取超过十次则跳过
-        num += 1
-        if num >= 10:
-            break
+    # 如果存在则略过
+    if os.path.exists(full_image_file_name):
+        return image_type
+    # 否则下载
+    download_resource(image_url, full_image_file_name)
     return image_type
+
+
+def _replace_css(css_url, css_tag, ebook_folder, css_name=None):
+    try:
+        assert isinstance(css_tag, bs4.element.Tag)
+    except AssertionError:
+        raise TypeError("css_tag cannot be of type " + str(type(css_tag)))
+    if css_name is None:
+        css_name = md5(css_url.encode('utf-8')).hexdigest()
+    try:
+        css_dir_path = os.path.join(ebook_folder, 'css')
+        assert os.path.exists(css_dir_path)
+        save_css(css_url, css_dir_path, css_name)
+        css_link = 'css' + '/' + css_name + '.css'
+        css_tag['href'] = css_link
+        return css_link, css_name, 'css'
+    except ResourceErrorException:
+        css_tag.decompose()
+    except AssertionError:
+        raise ValueError(
+            '%s doesn\'t exist or doesn\'t contain a subdirectory css' % ebook_folder)
+    except TypeError:
+        css_tag.decompose()
 
 
 def _replace_image(image_url, image_tag, ebook_folder,
@@ -145,8 +191,9 @@ def _replace_image(image_url, image_tag, ebook_folder,
                                      image_name)
         image_link = 'images' + '/' + image_name + '.' + image_extension
         image_tag['src'] = image_link
+        image_tag['href'] = image_link
         return image_link, image_name, image_extension
-    except ImageErrorException:
+    except ResourceErrorException:
         image_tag.decompose()
     except AssertionError:
         raise ValueError(
@@ -179,6 +226,7 @@ class Chapter():
         self.url = url
         self.html_title = html.escape(self.title, quote=True)
         self.imgs = []
+        self.css = []
 
     def write(self, file_name):
         """
@@ -227,6 +275,31 @@ class Chapter():
         image_nodes_filtered = [
             node for node in image_nodes if node.has_attr('src')]
         return zip(image_nodes_filtered, full_image_urls)
+
+    def _get_css_urls(self):
+        css_nodes = self._content_tree.find_all("link", type='text/css')
+        raw_css_urls = [node['href']
+                          for node in css_nodes if node.has_attr('href')]
+        full_css_urls = [urljoin(
+            self.url, image_url) for image_url in raw_css_urls]
+        css_nodes_filtered = [
+            node for node in css_nodes if node.has_attr('href')]
+        return zip(css_nodes_filtered, full_css_urls)
+
+    def _replace_css_in_chapter(self, ebook_folder):
+        css_url_list = self._get_css_urls()
+        for css_tag, css_url in css_url_list:
+            cssInfo = _replace_css(
+                css_url, css_tag, ebook_folder)
+            if cssInfo != None:
+                css_link, css_id, css_type = cssInfo
+                css = {'link': css_link, 'id': css_id, 'type': css_type}
+                if css not in self.css:
+                    self.css.append(css)
+        unformatted_html_unicode_string = self._content_tree.prettify()
+        unformatted_html_unicode_string = unformatted_html_unicode_string.replace(
+            '<br>', '<br/>')
+        self.content = unformatted_html_unicode_string
 
     def _replace_images_in_chapter(self, ebook_folder):
         image_url_list = self._get_image_urls()
