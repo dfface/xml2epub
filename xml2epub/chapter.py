@@ -256,7 +256,7 @@ class ChapterFactory():
         user_agent = r'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:31.0) Gecko/20100101 Firefox/31.0'
         self.request_headers = {'User-Agent': user_agent}
 
-    def create_chapter_from_url(self, url, title=None):
+    def create_chapter_from_url(self, url, title=None, strict=True):
         """
         从URL创建chapter对象. 
         从给定的url中提取网页, 使用clean_function方法对其进行清理, 并将其另存为创建的chpter的内容.
@@ -272,6 +272,10 @@ class ChapterFactory():
         Raises:
             ValueError: 如果无法连接该url则触发此 Error.
         """
+        if strict is True:
+            self.clean_function = clean.clean
+        else:
+            self.clean_function = clean.clean_not_strict
         try:
             request_object = requests.get(
                 url, headers=self.request_headers, allow_redirects=False)
@@ -284,7 +288,7 @@ class ChapterFactory():
         unicode_string = request_object.text
         return self.create_chapter_from_string(unicode_string, url, title)
 
-    def create_chapter_from_file(self, file_name, url=None, title=None):
+    def create_chapter_from_file(self, file_name, url=None, title=None, strict=True):
         """
         从html或xhtml文件创建chapter对象.
         使用clean_function方法清理文件的内容, 并将其另存为创建的chapter的内容.
@@ -297,6 +301,10 @@ class ChapterFactory():
         Returns:
             Chapter: 一个Chapter对象, 其内容是给定html或xhtml文件的内容.
         """
+        if strict is True:
+            self.clean_function = clean.clean
+        else:
+            self.clean_function = clean.clean_not_strict
         with codecs.open(file_name, 'r', encoding='utf-8') as f:
             content_string = f.read()
         return self.create_chapter_from_string(content_string, url, title)

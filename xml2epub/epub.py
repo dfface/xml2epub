@@ -11,10 +11,8 @@ import string
 import time
 import tempfile
 import imp
-from hashlib import md5
 
 from bs4 import BeautifulSoup
-from .chapter import get_image_type
 
 try:
     imp.find_module('lxml')
@@ -49,8 +47,7 @@ def get_cover_image_path(html_string):
                 cover_include = True
         if cover_include:
             if first_img['src']:
-                cover_name = md5(first_img['src'].encode('utf-8')).hexdigest()
-                return 'images' + '/' + cover_name + '.' + get_image_type(first_img['src'])
+                return first_img['src']
 
 
 class _Mimetype():
