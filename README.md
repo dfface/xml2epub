@@ -23,6 +23,21 @@ epub.add_chapter(chapter)
 epub.create_epub('OUTPUT_DIRECTORY')
 ```
 
+### 源码推送到pipy
+
+参考：https://zhuanlan.zhihu.com/p/37987613
+
+```bash
+pip3 install setuptools
+pip3 install wheel
+# 打包
+python3 setup.py sdist bdist_wheel
+
+pip3 install twine
+# 上传
+twine upload dist/*
+```
+
 ## Old Intro
 
 ### 简介
