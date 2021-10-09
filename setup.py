@@ -5,7 +5,7 @@ with open("README.md", "r", encoding='utf-8') as fh:
 
 setup(
     name='xml2epub',
-    version='1.4',
+    version='1.5',
     author='dfface',
     author_email='dfface@sina.com',
     description='将 html链接, html文件 或 html文本 转换成 epub文件，并自动添加封面.',
