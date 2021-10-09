@@ -207,7 +207,10 @@ class ContentOpf(_EpubFile):
     def add_chapters(self, chapter_list):
         # 查找 cover
         cover_image = ''
-        for i in range(0, 10):
+        chapter_list_end = 10
+        if len(chapter_list) < 10:
+            chapter_list_end = len(chapter_list)
+        for i in range(0, chapter_list_end):
             cover_path = get_cover_image_path(chapter_list[i].content)
             if cover_path is not None:
                 cover_image = cover_path
