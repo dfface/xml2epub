@@ -41,7 +41,7 @@ def get_cover_image_path(html_string):
         first_img = root.find('img')
         for cover_title in constants.COVER_TITLE_LIST:
             # 如果章节标题包含 封面 二字
-            if first_img is not None and title == cover_title:
+            if first_img is not None and title.upper() == cover_title.upper():
                 cover_include = True
             # 如果第一张图的src 或 href 包含 封面 二字
             if first_img is not None and re.match(r'.*({}).*'.format(cover_title), first_img['href'],
