@@ -142,7 +142,7 @@ if __name__ == '__main__':
     #         continue
     #     else:
     #         generate_ebook(book_id)
-    generate_ebook(30610590)
+    generate_ebook(30189715)
     # str = """<?xml version="1.0" encoding="utf-8" standalone="no"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"  "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title></title><link href="http://storage.360buyimg.com/ebooks/4fef996658c71fb571c607dce4df3822_new_.css" rel="stylesheet" type="text/css" /></head><body><div class="center"><img alt="" class="fullscreen" src="https://img30.360buyimg.com/ebookadmin/jfs/t1/119167/4/3130/132721/5ea68363E39425bab/57c198177edd7d71.jpg" href="./image/Images/cover.jpg" /></div></body></html>"""
     # bs = BeautifulSoup(str, 'html.parser')
     # print(bs.find('img')['src'])

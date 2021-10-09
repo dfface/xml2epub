@@ -16,7 +16,11 @@
     {% for chapter in chapters %}
     <item href="{{ chapter.link }}" id="{{ chapter.id }}" media-type="application/xhtml+xml"/>
       {% for img in chapter.imgs %}
-      <item href="{{ img.link }}" id="{{ img.id }}" media-type="image/{{ img.type }}"/>
+        {% if img.type == 'jpg' %}
+          <item href="{{ img.link }}" id="{{ img.id }}" media-type="image/jpeg"/>
+        {% else %}
+          <item href="{{ img.link }}" id="{{ img.id }}" media-type="image/{{ img.type }}"/>
+        {% endif %}
       {% endfor %}
     {% endfor %}
     {% for c in css %}

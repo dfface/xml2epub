@@ -1,6 +1,6 @@
 # xml2epub
 
-## update
+## Update
 
 原项目已经较为成熟 [Html2Epub](https://github.com/zzZ5/Html2Epub) ，此次更改是为了满足自身需求，主要是取消 html string 的清洗：
 
