@@ -145,7 +145,7 @@ def _replace_css(css_url, css_tag, ebook_folder, css_name=None):
     except AssertionError:
         raise TypeError("css_tag cannot be of type " + str(type(css_tag)))
     if css_name is None:
-        css_name = md5(css_url.encode('utf-8')).hexdigest()
+        css_name = md5(css_url.encode('utf-8')).hexdigest()[:6]
     try:
         css_dir_path = os.path.join(ebook_folder, 'css')
         assert os.path.exists(css_dir_path)
@@ -170,7 +170,7 @@ def _replace_image(image_url, image_tag, ebook_folder,
     Parameters:
         image_url (str): image的url.
         image_tag (bs4.element.Tag): bs4中包含image的tag.
-        ebook_folder (str): 将外部图片保存到本地的地址. 内部一定要包含一个名为 "images" 的文件夹.
+        ebook_folder (str): 将外部图片保存到本地的地址. 内部一定要包含一个名为 "img" 的文件夹.
         image_name (Option[str]): 保存到本地的imgae的文件名(不包含后缀).
 
     Returns:
@@ -183,13 +183,13 @@ def _replace_image(image_url, image_tag, ebook_folder,
     except AssertionError:
         raise TypeError("image_tag cannot be of type " + str(type(image_tag)))
     if image_name is None:
-        image_name = md5(image_url.encode('utf-8')).hexdigest()
+        image_name = md5(image_url.encode('utf-8')).hexdigest()[:6]
     try:
-        image_full_path = os.path.join(ebook_folder, 'images')
+        image_full_path = os.path.join(ebook_folder, 'img')
         assert os.path.exists(image_full_path)
         image_extension = save_image(image_url, image_full_path,
                                      image_name)
-        image_link = 'images' + '/' + image_name + '.' + image_extension
+        image_link = 'img' + '/' + image_name + '.' + image_extension
         image_tag['src'] = image_link
         image_tag['href'] = image_link
         return image_link, image_name, image_extension
@@ -197,7 +197,7 @@ def _replace_image(image_url, image_tag, ebook_folder,
         image_tag.decompose()
     except AssertionError:
         raise ValueError(
-            '%s doesn\'t exist or doesn\'t contain a subdirectory images' % ebook_folder)
+            '%s doesn\'t exist or doesn\'t contain a subdirectory img' % ebook_folder)
     except TypeError:
         image_tag.decompose()
 

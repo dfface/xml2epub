@@ -284,7 +284,7 @@ class Epub():
             self.EPUB_DIR = epub_dir
         self.OEBPS_DIR = os.path.join(self.EPUB_DIR, 'OEBPS')
         self.META_INF_DIR = os.path.join(self.EPUB_DIR, 'META-INF')
-        self.LOCAL_IMAGE_DIR = 'images'
+        self.LOCAL_IMAGE_DIR = 'img'
         self.LOCAL_CSS_DIR = 'css'
         self.IMAGE_DIR = os.path.join(self.OEBPS_DIR, self.LOCAL_IMAGE_DIR)
         self.CSS_DIR = os.path.join(self.OEBPS_DIR, self.LOCAL_CSS_DIR)

@@ -3,3 +3,4 @@ dist
 venv
 xml2epub.egg-info
 test.py
+.idea
