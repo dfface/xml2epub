@@ -8,7 +8,7 @@ import imghdr
 import os
 import shutil
 import tempfile
-import urllib
+from urllib.request import urlretrieve
 from urllib.parse import urljoin
 from hashlib import md5
 
@@ -47,14 +47,14 @@ def get_image_type(url):
     raises:
         IOError: 图片类型不在 {'jpg', 'jpge', 'gif', 'png'} 四个类型之中
     """
-
-    for ending in ['jpg', 'jpeg', 'gif' 'png']:
+    # bugfix: 居然漏写了一个逗号！
+    for ending in ['jpg', 'jpeg', 'gif', 'png']:
         if url.endswith(ending):
             return ending
     else:
         try:
             _, temp_file_name = tempfile.mkstemp()
-            urllib.request.urlretrieve(url, temp_file_name)
+            urlretrieve(url, temp_file_name)
             image_type = imghdr.what(temp_file_name)
             return image_type
         except IOError:
@@ -126,7 +126,6 @@ def save_image(image_url, image_directory, image_name):
         raise ResourceErrorException(image_url)
     full_image_file_name = os.path.join(
         image_directory, image_name + '.' + image_type)
-
     # If the image is present on the local filesystem just copy it
     if os.path.exists(image_url):
         shutil.copy(image_url, full_image_file_name)
@@ -145,7 +144,7 @@ def _replace_css(css_url, css_tag, ebook_folder, css_name=None):
     except AssertionError:
         raise TypeError("css_tag cannot be of type " + str(type(css_tag)))
     if css_name is None:
-        css_name = md5(css_url.encode('utf-8')).hexdigest()[:6]
+        css_name = md5(css_url.encode('utf-8')).hexdigest()
     try:
         css_dir_path = os.path.join(ebook_folder, 'css')
         assert os.path.exists(css_dir_path)
@@ -183,7 +182,7 @@ def _replace_image(image_url, image_tag, ebook_folder,
     except AssertionError:
         raise TypeError("image_tag cannot be of type " + str(type(image_tag)))
     if image_name is None:
-        image_name = md5(image_url.encode('utf-8')).hexdigest()[:6]
+        image_name = md5(image_url.encode('utf-8')).hexdigest()
     try:
         image_full_path = os.path.join(ebook_folder, 'img')
         assert os.path.exists(image_full_path)

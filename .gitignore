@@ -4,3 +4,5 @@ venv
 xml2epub.egg-info
 test.py
 .idea
+.DS_Store
+__pycache__
