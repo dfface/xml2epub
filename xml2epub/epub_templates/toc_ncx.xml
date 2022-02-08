@@ -10,11 +10,11 @@
     <text> {{ title }}</text>
   </docTitle>
   <navMap>
-    {% for chapter in chapters %}
+    {%- for chapter in chapters %}
     <navPoint id="{{ chapter.id }}" playOrder="{{ chapter.play_order }}">
       <navLabel><text>{{ chapter.title }}</text></navLabel>
       <content src="{{ chapter.link }}"/>
     </navPoint>
-    {% endfor %}
+    {%- endfor %}
   </navMap>
 </ncx>

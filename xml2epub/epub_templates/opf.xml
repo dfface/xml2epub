@@ -13,27 +13,29 @@
   <manifest>
     <item properties="cover-image" id="cover-image" href="{{ cover_image }}" media-type="image/jpeg" />
     <item href="toc.ncx" id="ncx" media-type="application/x-dtbncx+xml"/>
-    {% for chapter in chapters %}
+    <item href="toc.html" id="toc" media-type="application/xhtml+xml"/>
+    {%- for chapter in chapters %}
     <item href="{{ chapter.link }}" id="{{ chapter.id }}" media-type="application/xhtml+xml"/>
-      {% for img in chapter.imgs %}
-        {% if img.type == 'jpg' %}
+      {%- for img in chapter.imgs %}
+        {%- if img.type == 'jpg' %}
           <item href="{{ img.link }}" id="{{ img.id }}" media-type="image/jpeg"/>
-        {% else %}
+        {%- else %}
           <item href="{{ img.link }}" id="{{ img.id }}" media-type="image/{{ img.type }}"/>
-        {% endif %}
-      {% endfor %}
-    {% endfor %}
-    {% for c in css %}
+        {%- endif %}
+      {%- endfor %}
+    {%- endfor %}
+    {%- for c in css %}
     <item href="{{ c.link }}" id="{{ c.id }}" media-type="text/{{ c.type }}"/>
-    {% endfor %}
+    {%- endfor %}
   </manifest>
   <spine toc="ncx">
+    {%- for chapter in chapters %}
+        <itemref idref="{{ chapter.id }}"/>
+    {%- endfor %}
     <itemref idref="toc"/>
-    {% for chapter in chapters %}
-    <itemref idref="{{ chapter.id }}"/>
-    {% endfor %}
   </spine>
   <guide>
-    <reference href="0.html" title="Cover" type="cover" />
+    <reference href="0.xhtml" title="Cover" type="cover"/>
+    <reference type="toc" href="toc.html" title="Table of Contents"/>
   </guide>
 </package>
