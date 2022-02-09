@@ -10,12 +10,12 @@ import random
 import string
 import time
 import tempfile
-import imp
+import importlib.util as imp
 
 from bs4 import BeautifulSoup
 
 try:
-    imp.find_module('lxml')
+    imp.find_spec('lxml')
     lxml_module_exists = True
     import lxml.etree
     import lxml.html
@@ -32,6 +32,10 @@ from . import constants
 
 
 def get_cover_image_path(html_string):
+    """
+    在静态资源替换之后的chapters中查找cover，找不到返回None，找到则返回src
+    因为一旦 add_chapter 就实现了资源替换和字符串清理，之后 create 方法中会调用本方法
+    """
     # 如果第一张图的 title 等于封面、第一张图的 href 中有 cover 关键字
     root = BeautifulSoup(html_string, 'html.parser')
     title_node = root.title
@@ -47,12 +51,11 @@ def get_cover_image_path(html_string):
             if first_img is not None and re.match(r'.*({}).*'.format(cover_title), first_img['href'],
                                                   re.I) is not None:
                 cover_include = True
-        if cover_include:
-            if first_img['src']:
-                return first_img['src']
+        if cover_include and first_img['src'] is not None:
+            return first_img['src']
 
 
-class _Mimetype():
+class _Mimetype(object):
     """
     Epub的 Mimetype文件 类, 写入固定内容的 minetype文件 到epub.
     """
@@ -64,7 +67,7 @@ class _Mimetype():
                     os.path.join(parent_directory, 'mimetype'))
 
 
-class _ContainerFile():
+class _ContainerFile(object):
     """
     Epub的 Container文件 类, 写入固定内容的 container.xml文件到 epub.
     """
@@ -76,7 +79,7 @@ class _ContainerFile():
                     os.path.join(parent_directory, 'container.xml'))
 
 
-class _EpubFile():
+class _EpubFile(object):
     """
     用于将chapters写入Epub的类
     """
@@ -95,8 +98,8 @@ class _EpubFile():
     def _render_template(self, **variable_value_pairs):
         def read_template():
             with open(self.template_file, 'r', encoding="utf-8") as f:
-                template = f.read()
-            return jinja2.Template(template)
+                tem = f.read()
+            return jinja2.Template(tem)
 
         template = read_template()
         rendered_template = template.render(variable_value_pairs)
@@ -109,6 +112,9 @@ class _EpubFile():
         if 'css' in parameter_lists.keys():
             self.non_chapter_parameters['css'] = parameter_lists['css']
             parameter_lists.pop('css')
+        if 'imgs' in parameter_lists.keys():
+            self.non_chapter_parameters['imgs'] = parameter_lists['imgs']
+            parameter_lists.pop('imgs')
 
         def check_list_lengths(lists):
             list_length = None
@@ -205,8 +211,8 @@ class ContentOpf(_EpubFile):
                                          date=date)
 
     def add_chapters(self, chapter_list):
-        # 查找 cover
-        cover_image = ''
+        # 查找 cover，设定在前10章内找
+        cover_image = 'img/cover.jpg'
         chapter_list_end = 10
         if len(chapter_list) < 10:
             chapter_list_end = len(chapter_list)
@@ -214,22 +220,26 @@ class ContentOpf(_EpubFile):
             cover_path = get_cover_image_path(chapter_list[i].content)
             if cover_path is not None:
                 cover_image = cover_path
-        # 如果第一张图的属性的 class 为 fullscreen
-        first_chapter = BeautifulSoup(chapter_list[0].content, 'html.parser')
-        if first_chapter.find('img')['class'] is not None and 'fullscreen' in first_chapter.find('img')['class']:
-            cover_image = first_chapter.find('img')['src']
+                break
+        # 整理 封面
+        cover = {'type': chapter.get_image_type(cover_image), 'link': cover_image}
         # 整理 css ，去重
         css = []
         for c in chapter_list:
             for s in c.css:
                 if s not in css:
                     css.append(s)
+        # 整理 img，去重
+        imgs = []
+        for c in chapter_list:
+            for i in c.imgs:
+                if i not in imgs:
+                    imgs.append(i)
         # 添加 items
         id_list = range(len(chapter_list))
         link_list = [str(n) + '.xhtml' for n in id_list]
-        imgs_list = [c.imgs for c in chapter_list]
-        super(ContentOpf, self).add_chapters(cover_image=cover_image, css=css,
-                                             **{'id': id_list, 'link': link_list, "imgs": imgs_list})
+        super(ContentOpf, self).add_chapters(cover_image=cover, css=css, imgs=imgs,
+                                             **{'id': id_list, 'link': link_list})
 
     def get_content_as_element(self):
         if lxml_module_exists:
@@ -239,7 +249,7 @@ class ContentOpf(_EpubFile):
             raise NotImplementedError()
 
 
-class Epub():
+class Epub(object):
     """
     表示epub的类. 包含添加chapter和输出epub文件.
 
@@ -249,9 +259,10 @@ class Epub():
         language (Option[str]): epub的语言.
         rights (Option[str]): epub的版权.
         publisher (Option[str]): epub的出版商.
+        epub_dir(Option[str]): epub的中间文件生成的路径，默认使用系统的临时文件路径，也可自行指定.
     """
 
-    def __init__(self, title, creator='dfface', language='en', rights='', publisher='dfface', epub_dir=None):
+    def __init__(self, title, creator='dfface', language='en', rights='', publisher='dfface/xml2epub', epub_dir=None):
         self._create_directories(epub_dir)
         self.chapters = []
         self.title = title
@@ -324,8 +335,8 @@ class Epub():
             raise TypeError('chapter must be of type Chapter')
         chapter_file_output = os.path.join(
             self.OEBPS_DIR, self.current_chapter_path)
-        c._replace_images_in_chapter(self.OEBPS_DIR)
-        c._replace_css_in_chapter(self.OEBPS_DIR)
+        c.replace_images_in_chapter(self.OEBPS_DIR)
+        c.replace_css_in_chapter(self.OEBPS_DIR)
         c.write(chapter_file_output)
         self._increase_current_chapter_number()
         self.chapters.append(c)
@@ -349,17 +360,17 @@ class Epub():
                 epub_file.add_chapters(self.chapters)
                 epub_file.write(os.path.join(self.OEBPS_DIR, name))
 
-        def create_zip_archive(epub_name):
+        def create_zip_archive(epub_file_name):
             try:
                 assert isinstance(
-                    epub_name, str) or epub_name is None
+                    epub_file_name, str) or epub_file_name is None
             except AssertionError:
                 raise TypeError('epub_name must be string or None')
-            if epub_name is None:
-                epub_name = self.title
-            epub_name = ''.join(
-                [c for c in epub_name if c.isalpha() or c.isdigit() or c == ' ']).rstrip()
-            epub_name_with_path = os.path.join(output_directory, epub_name)
+            if epub_file_name is None:
+                epub_file_name = self.title
+            epub_file_name = ''.join(
+                [c for c in epub_file_name if c.isalpha() or c.isdigit() or c == ' ']).rstrip()
+            epub_name_with_path = os.path.join(output_directory, epub_file_name)
             try:
                 os.remove(os.path.join(epub_name_with_path, '.zip'))
             except OSError:

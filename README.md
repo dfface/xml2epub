@@ -1,44 +1,70 @@
 # xml2epub
 
-## Update
+![GitHub Repo stars](https://img.shields.io/github/stars/dfface/xml2epub)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/dfface/xml2epub/Upload%20to%20PIP)
+[![python](https://img.shields.io/pypi/pyversions/xml2epub)](https://pypi.org/project/xml2epub/)
+[![pypi](https://img.shields.io/pypi/v/xml2epub)](https://pypi.org/project/xml2epub/)
+[![wheel](https://img.shields.io/pypi/wheel/xml2epub)](https://pypi.org/project/xml2epub/)
+[![license](https://img.shields.io/github/license/dfface/xml2epub)](https://pypi.org/project/xml2epub/)
+![PyPI - Downloads](https://img.shields.io/pypi/dd/xml2epub)
 
-### 介绍
+Batch convert multiple web pages into one e-book by URL, xml string, etc.
 
-原项目已经较为成熟 [Html2Epub](https://github.com/zzZ5/Html2Epub) ，此次更改是为了满足自身需求，主要是取消 html string 的清洗：
+## How to install
 
-* 关于页面清洗：html string 通过 `create_chapter_from_string` 的参数 `strict` 控制，`False` 表示不清洗
-* 关于封面：xml string 中如果包含`<title>封面</title>`或者`<title>cover</title>`等，则应该自动生成 epub 文件的封面
-* 关于替换静态资源，做的改进是：
-  * 图片的名称由`uuid`改为`md5(url)` 作为名称(128位 16个字符)，图片文件夹为 img
-  * 提取页面中的 css 并保存在 css 文件夹中
+`xml2epub` is available on pypi
+https://pypi.org/project/xml2epub/
 
-### 使用示例
+```
+$ pip install xml2epub
+```
+
+## Basic Usage
 
 ```python
 import xml2epub
 
-epub = xml2epub.Epub('My First Epub')
-chapter = xml2epub.create_chapter_from_url('https://en.wikipedia.org/wiki/EPUB')
-epub.add_chapter(chapter)
-epub.create_epub('OUTPUT_DIRECTORY')
+## create an empty eBook
+book = xml2epub.Epub("My New E-book Name")
+## create chapters by url
+chapter1 = xml2epub.create_chapter_from_url("https://dev.to/devteam/top-7-featured-dev-posts-from-the-past-week-h6h")
+chapter2 = xml2epub.create_chapter_from_url("https://dev.to/ks1912/getting-started-with-docker-34g6")
+## add chapters to your eBook
+book.add_chapter(chapter1)
+book.add_chapter(chapter2)
+## generate epub file
+book.create_epub("Your Output Directory")
 ```
 
-### 源码推送到pipy
+After waiting for a while, if no error is reported, the following "My New E-book Name.epub" file will be generated in "Your Output Directory":
 
-参考：https://zhuanlan.zhihu.com/p/37987613
+![The generated epub file](https://cdn.jsdelivr.net/gh/dfface/img0@master/2022/02-09-Guz0bl.png)
 
-```bash
-pip3 install setuptools
-pip3 install wheel
-# 打包
-python3 setup.py sdist bdist_wheel
+## API
 
-pip3 install twine
-# 上传
-twine upload dist/*
-```
-
-### 参考文献
-
-1. *[wcember/pypub: Python library to programatically create epub files](https://github.com/wcember/pypub).*
-2. *[EPUB - Wikipedia](https://en.wikipedia.org/wiki/EPUB).*
+* `create_chapter_from_file(file_name, url=None, title=None, strict=True)`: Create a Chapter object from an html or xhtml file.
+  * file_name (string): The filename containing the html or xhtml content of the created chapter.
+  * url (Option[string]): The url used to infer the chapter title.
+  * title (Option[string]): The chapter name of the chapter, if None, the content of the title tag obtained from the web file will be used as the chapter name.
+  * strict （Option[boolean]): Whether to perform strict page cleaning, which will remove inline styles, insignificant attributes, etc., generally True.
+* `create_chapter_from_url(url, title=None, strict=True)`: Create a Chapter object by extracting webpage from given url.
+  * url (string): website link.
+  * title (Option[string]): The chapter name of the chapter, if None, the content of the title tag obtained from the web file will be used as the chapter name.
+  * strict （Option[boolean]): Whether to perform strict page cleaning, which will remove inline styles, insignificant attributes, etc., generally True.
+* `create_chapter_from_string(html_string, url=None, title=None, strict=True)`: Create a Chapter object from a string. The principle of the above two methods is to first obtain the html or xml string, and then call this method.
+  * html_string (string): html or xhtml string.
+  * url (Option[string]): The url used to infer the chapter title.
+  * title (Option[string]): The chapter name of the chapter, if None, the content of the title tag obtained from the web file will be used as the chapter name.
+  * strict （Option[boolean]): Whether to perform strict page cleaning, which will remove inline styles, insignificant attributes, etc., generally True.
+* `Epub(title, creator='dfface', language='en', rights='', publisher='dfface', epub_dir=None)`: Constructor method to create Epub object.Mainly used to add book information and all chapters and generate epub file.
+  * title (str): The [title](http://kb.daisy.org/publishing/docs/epub/title.html) of the epub.
+  * creator (Option[str]): The [author](http://kb.daisy.org/publishing/docs/html/dpub-aria/doc-credit.html) of the epub.
+  * language (Option[str]): The [language](http://kb.daisy.org/publishing/docs/epub/language.html) of the epub.
+  * rights (Option[str]): The [copyright](http://kb.daisy.org/publishing/docs/html/dpub-aria/doc-credit.html) of the epub.
+  * publisher (Option[str]): The [publisher](http://kb.daisy.org/publishing/docs/html/dpub-aria/doc-credit.html) of the epub.
+  * epub_dir(Option[str]): The path of intermediate file, the system's temporary file path is used by default, or you can specify it yourself.
+* Epub object  `add_chapter(chapter_object)`: Add Chapter object to Epub.
+  * chapter_object (Chapter object): Use the three methods of creating a chapter object to get the object.
+* Epub object  `create_epub(output_directory, epub_name=None)`: Create an epub file from the Epub object.
+  * output_directory (str): Directory to output the epub file to.
+  * epub_name (Option[str]): The file name of your epub. This should not contain .epub at the end. If this argument is not provided, defaults to the title of the epub.

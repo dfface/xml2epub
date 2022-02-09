@@ -76,7 +76,8 @@ def download_resource(url, path):
         try:
             # urllib.urlretrieve(image_url, full_image_file_name)
             with open(path, 'wb') as f:
-                user_agent = r'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36'
+                user_agent = r'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) ' \
+                             r'Chrome/69.0.3497.100 Safari/537.36'
                 request_headers = {'User-Agent': user_agent}
                 requests_object = requests.get(url, headers=request_headers)
                 try:
@@ -201,7 +202,7 @@ def _replace_image(image_url, image_tag, ebook_folder,
         image_tag.decompose()
 
 
-class Chapter():
+class Chapter(object):
     """
     chapter对象类. 不能直接调用, 应该用 ChapterFactor() 去实例化chapter.
 
@@ -277,21 +278,20 @@ class Chapter():
 
     def _get_css_urls(self):
         css_nodes = self._content_tree.find_all("link", type='text/css')
-        raw_css_urls = [node['href']
-                          for node in css_nodes if node.has_attr('href')]
+        raw_css_urls = [node['href'] for node in css_nodes if node.has_attr('href')]
         full_css_urls = [urljoin(
             self.url, image_url) for image_url in raw_css_urls]
         css_nodes_filtered = [
             node for node in css_nodes if node.has_attr('href')]
         return zip(css_nodes_filtered, full_css_urls)
 
-    def _replace_css_in_chapter(self, ebook_folder):
+    def replace_css_in_chapter(self, ebook_folder):
         css_url_list = self._get_css_urls()
         for css_tag, css_url in css_url_list:
-            cssInfo = _replace_css(
+            css_info = _replace_css(
                 css_url, css_tag, ebook_folder)
-            if cssInfo != None:
-                css_link, css_id, css_type = cssInfo
+            if css_info is not None:
+                css_link, css_id, css_type = css_info
                 css = {'link': css_link, 'id': css_id, 'type': css_type}
                 if css not in self.css:
                     self.css.append(css)
@@ -300,13 +300,13 @@ class Chapter():
             '<br>', '<br/>')
         self.content = unformatted_html_unicode_string
 
-    def _replace_images_in_chapter(self, ebook_folder):
+    def replace_images_in_chapter(self, ebook_folder):
         image_url_list = self._get_image_urls()
         for image_tag, image_url in image_url_list:
-            imgInfo = _replace_image(
+            img_info = _replace_image(
                 image_url, image_tag, ebook_folder)
-            if imgInfo != None:
-                img_link, img_id, img_type = imgInfo
+            if img_info is not None:
+                img_link, img_id, img_type = img_info
                 img = {'link': img_link, 'id': img_id, 'type': img_type}
                 self.imgs.append(img)
         unformatted_html_unicode_string = self._content_tree.prettify()
@@ -315,7 +315,7 @@ class Chapter():
         self.content = unformatted_html_unicode_string
 
 
-class ChapterFactory():
+class ChapterFactory(object):
     """
     用来创建 chapter的类. 可以从 url, 文件 或 文本 三个方式创建 chapter.
 
@@ -337,7 +337,8 @@ class ChapterFactory():
         Parameters:
             url (string): 获取chapter对象的网页地址.
             title (Option[string]): chapter的章节名, 如果为None, 则使用从网页中获取的 title标签 的内容作为章节名.
-
+            strict(Option[string]): Whether to perform strict page cleaning, which will remove inline styles,
+             insignificant attributes, etc., generally True.
         Returns:
             Chapter: 一个Chapter对象, 其内容是给定url的网页. 
 
@@ -357,7 +358,9 @@ class ChapterFactory():
                 requests.exceptions.ConnectionError):
             raise ValueError(
                 "%s is an invalid url or no network connection" % url)
+        request_object.encoding = 'utf-8'
         unicode_string = request_object.text
+        # 这里对文章进行清理，只选择 article 正文，不要导航栏这些
         return self.create_chapter_from_string(unicode_string, url, title)
 
     def create_chapter_from_file(self, file_name, url=None, title=None, strict=True):
@@ -369,7 +372,8 @@ class ChapterFactory():
             file_name (string): 包含所创建chapter的html或xhtml内容的file_name.
             url (Option[string]): A url to infer the title of the chapter from
             title (Option[string]): chapter的章节名, 如果为None, 则使用从网页文件中获取的 title标签 的内容作为章节名.
-
+            strict (Option[string]) : Whether to perform strict page cleaning, which will remove inline styles,
+             insignificant attributes, etc., generally True.
         Returns:
             Chapter: 一个Chapter对象, 其内容是给定html或xhtml文件的内容.
         """

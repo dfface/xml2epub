@@ -67,7 +67,8 @@ SINGLETON_TAG_LIST = [
     'source',
 ]
 COVER_TITLE_LIST = [
-    '封面', 'cover', 'cover-image', 'ci'
+    'cover', 'cover-image', 'ci', '封面', 'カバー', 'couverture',
+    'Startseite', 'trải ra', 'ปิดบัง', '씌우다', 'обложка', 'التغطية'
 ]
 xhtml_doctype_string = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">'
 BASE_DIR = os.path.dirname(os.path.realpath(__file__))
