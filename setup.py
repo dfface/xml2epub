@@ -5,10 +5,10 @@ with open("README.md", "r", encoding='utf-8') as fh:
 
 setup(
     name='xml2epub',
-    version='1.9',
+    version='2.0',
     author='dfface',
     author_email='dfface@sina.com',
-    description='将 html链接, html文件 或 html文本 转换成 epub文件，并自动添加封面.',
+    description='Batch convert multiple web pages into one e-book by URL, xml string, etc.',
     long_description=long_description,
     long_description_content_type="text/markdown",
     url='https://github.com/dfface/xml2epub',
@@ -16,6 +16,12 @@ setup(
     package_data={'xml2epub': ['epub_templates/*', ]},
     classifiers=[
         "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3 :: Only",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],

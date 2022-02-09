@@ -11,21 +11,25 @@
     <meta name="cover" content="cover-image"/>
   </metadata>
   <manifest>
-    <item properties="cover-image" id="cover-image" href="{{ cover_image }}" media-type="image/jpeg" />
+    {%- if cover_image.type == 'jpg' %}
+    <item properties="cover-image" id="cover-image" href="{{ cover_image.link }}" media-type="image/jpeg" />
+    {%- else %}
+    <item properties="cover-image" id="cover-image" href="{{ cover_image.link }}" media-type="image/{{ cover_image.type }}" />
+    {%- endif %}
     <item href="toc.ncx" id="ncx" media-type="application/x-dtbncx+xml"/>
     <item href="toc.html" id="toc" media-type="application/xhtml+xml"/>
     {%- for chapter in chapters %}
     <item href="{{ chapter.link }}" id="{{ chapter.id }}" media-type="application/xhtml+xml"/>
-      {%- for img in chapter.imgs %}
-        {%- if img.type == 'jpg' %}
-          <item href="{{ img.link }}" id="{{ img.id }}" media-type="image/jpeg"/>
-        {%- else %}
-          <item href="{{ img.link }}" id="{{ img.id }}" media-type="image/{{ img.type }}"/>
-        {%- endif %}
-      {%- endfor %}
     {%- endfor %}
     {%- for c in css %}
     <item href="{{ c.link }}" id="{{ c.id }}" media-type="text/{{ c.type }}"/>
+    {%- endfor %}
+    {%- for img in imgs %}
+    {%- if img.type == 'jpg' %}
+    <item href="{{ img.link }}" id="{{ img.id }}" media-type="image/jpeg"/>
+    {%- else %}
+    <item href="{{ img.link }}" id="{{ img.id }}" media-type="image/{{ img.type }}"/>
+    {%- endif %}
     {%- endfor %}
   </manifest>
   <spine toc="ncx">
@@ -35,7 +39,7 @@
     <itemref idref="toc"/>
   </spine>
   <guide>
-    <reference href="0.xhtml" title="Cover" type="cover"/>
+    <reference href="{{ cover_image.link }}" title="Cover" type="cover"/>
     <reference type="toc" href="toc.html" title="Table of Contents"/>
   </guide>
 </package>
