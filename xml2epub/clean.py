@@ -38,7 +38,6 @@ def create_html_from_fragment(tag):
     return soup
 
 
-
 def clean(input_string,
           tag_dictionary=constants.SUPPORTED_TAGS):
     """
@@ -85,7 +84,7 @@ def clean(input_string,
                     attribute_dict.pop(attribute)
         stack.extend(child_node_list)
     # wrap partial tree if necessary
-    if root.find_all('html') == []:
+    if not root.find_all('html'):
         root = create_html_from_fragment(root)
     # Remove img tags without src attribute
     image_node_list = root.find_all('img')
@@ -120,7 +119,7 @@ def clean_not_strict(input_string):
         root = create_html_from_fragment(BeautifulSoup(f'<img src="{input_string}" />').img)
     else:
         root = BeautifulSoup(input_string, 'html.parser')
-        if root.find_all('html') == []:
+        if not root.find_all('html'):
             root = create_html_from_fragment(root)
     unformatted_html_unicode_string = root.prettify()
     unformatted_html_unicode_string = unformatted_html_unicode_string.replace(
