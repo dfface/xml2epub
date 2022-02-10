@@ -278,6 +278,8 @@ class Chapter(object):
 
     def _get_css_urls(self):
         css_nodes = self._content_tree.find_all("link", type='text/css')
+        css_nodes_ref = self._content_tree.find_all("link", rel='stylesheet')
+        css_nodes.extend(css_nodes_ref)
         raw_css_urls = [node['href'] for node in css_nodes if node.has_attr('href')]
         full_css_urls = [urljoin(
             self.url, image_url) for image_url in raw_css_urls]

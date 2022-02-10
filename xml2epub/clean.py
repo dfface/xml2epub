@@ -11,7 +11,6 @@ from bs4 import BeautifulSoup
 # Local modules
 from . import constants
 
-
 def create_html_from_fragment(tag):
     """
     Creates full html tree from a fragment. Assumes that tag should be wrapped in a body and is currently not
@@ -39,7 +38,9 @@ def create_html_from_fragment(tag):
 
 
 def clean(input_string,
-          tag_dictionary=constants.SUPPORTED_TAGS):
+          tag_dictionary=constants.SUPPORTED_TAGS,
+          tag_clean_list=constants.TAG_DELETE_LIST,
+          class_list=constants.CLASS_INCLUDE_LIST):
     """
     Sanitizes HTML. Tags not contained as keys in the tag_dictionary input are
     removed, and child nodes are recursively moved to parent of removed node.
@@ -53,6 +54,8 @@ def clean(input_string,
             isn't contained, it will be removed. By default, this is set to
             use the supported tags and attributes for the Amazon Kindle,
             as found at https://kdp.amazon.com/help?topicId=A1JPUWCSD6F59O
+        class_list (Option[dict]): 清理class属性中可能包含该列表中关键字的所有元素
+        tag_clean_list (Option[dict]): 清理该列表中包含的所有 tag 元素及其子元素
 
     Returns:
         str: A (possibly unicode) string representing HTML.
@@ -64,14 +67,26 @@ def clean(input_string,
         assert isinstance(input_string, str)
     except AssertionError:
         raise TypeError
-    root = BeautifulSoup(input_string, 'html.parser')
+    # 使用 lxml 更为准确和严格，不要保存 link 元素，很难控制
+    root = BeautifulSoup(input_string, 'lxml')
     article_tag = root.find_all('article')
     if article_tag:
         root = article_tag[0]
-    stack = root.findAll(True, recursive=False)
+    # 删除导航栏、边栏等元素及其子元素
+    for i in class_list:
+        to_delete = root.find_all(lambda tag: tag.has_attr('class') and str(tag['class']).find(i) != -1)
+        for td in to_delete:
+            td.extract()
+    # 删除 tag_clean_list 中包含的所有 tag 及其子元素
+    for i in tag_clean_list:
+        to_delete = root.find_all(i)
+        for td in to_delete:
+            td.extract()
+    # 仅保留 tag 字典中的元素
+    stack = root.find_all(True, recursive=False)
     while stack:
         current_node = stack.pop()
-        child_node_list = current_node.findAll(True, recursive=False)
+        child_node_list = current_node.find_all(True, recursive=False)
         if current_node.name not in tag_dictionary.keys():
             parent_node = current_node.parent
             current_node.extract()

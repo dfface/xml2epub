@@ -12,6 +12,7 @@ SUPPORTED_TAGS = {
     'br': ['id'],
     'center': [],
     'cite': [],
+    'code': [],
     'dd': ['id', 'title'],
     'del': [],
     'dfn': [],
@@ -65,6 +66,19 @@ SINGLETON_TAG_LIST = [
     'meta',
     'param',
     'source',
+]
+CLASS_INCLUDE_LIST = [
+    'side'
+    'nav',
+    'hidden',
+    'hide',
+    'edit',
+    'audio',
+    'video',
+]
+TAG_DELETE_LIST = [
+    'aside',
+    'nav'
 ]
 COVER_TITLE_LIST = [
     'cover', 'cover-image', 'ci', '封面', 'カバー', 'couverture',

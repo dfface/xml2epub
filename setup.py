@@ -5,9 +5,10 @@ with open("README.md", "r", encoding='utf-8') as fh:
 
 setup(
     name='xml2epub',
-    version='2.0',
+    version='2.1',
     author='dfface',
     author_email='dfface@sina.com',
+    keywords="convert html url export epub",
     description='Batch convert multiple web pages into one e-book by URL, xml string, etc.',
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -29,5 +30,6 @@ setup(
         'beautifulsoup4',
         'jinja2',
         'requests',
+        'lxml'
     ]
 )
