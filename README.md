@@ -15,6 +15,14 @@ Features:
 then the cover will be added automatically, otherwise the default cover will be generated. We will randomly generate the cover image with a similar "O'Reilly" style.
 * Automatically obtain the core content of the article: we filter the obtained html string and retain the core content. See [SUPPORTED_TAGS](./xml2epub/constants.py) for a list of tags reserved in html.
 
+## ToC
+
+* [How to install](#how-to-install)
+* [Basic Usage](#basic-usage)
+* [API](#api)
+* [Tips](#tips)
+* [FAQ](#faq)
+
 ## How to install
 
 `xml2epub` is available on pypi
