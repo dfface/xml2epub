@@ -67,16 +67,16 @@ If we cannot infer the cover image from html string, we will generate one. The r
 
 * `create_chapter_from_file(file_name, url=None, title=None, strict=True)`: Create a Chapter object from an html or xhtml file.
   * file_name (string): The filename containing the html or xhtml content of the created chapter.
-  * url (Option[string]): The url used to infer the chapter title.
+  * url (Option[string]): The url used to infer the chapter title. It is recommended to bring the `url` parameter, which helps to identify relative links in the web page.
   * title (Option[string]): The chapter name of the chapter, if None, the content of the title tag obtained from the web file will be used as the chapter name.
   * strict (Option[boolean]): Whether to perform strict page cleaning, which will remove inline styles, insignificant attributes, etc., generally True.
 * `create_chapter_from_url(url, title=None, strict=True)`: Create a Chapter object by extracting webpage from given url.
-  * url (string): website link.
+  * url (string): website link. It is recommended to bring the `url` parameter, which helps to identify relative links in the web page.
   * title (Option[string]): The chapter name of the chapter, if None, the content of the title tag obtained from the web file will be used as the chapter name.
   * strict (Option[boolean]): Whether to perform strict page cleaning, which will remove inline styles, insignificant attributes, etc., generally True. When False, you can enter an image link and specify title, which is helpful for custom cover image.
 * `create_chapter_from_string(html_string, url=None, title=None, strict=True)`: Create a Chapter object from a string. The principle of the above two methods is to first obtain the html or xml string, and then call this method. 
   * html_string (string): html or xhtml string.
-  * url (Option[string]): The url used to infer the chapter title.
+  * url (Option[string]): The url used to infer the chapter title. It is recommended to bring the `url` parameter, which helps to identify relative links in the web page.
   * title (Option[string]): The chapter name of the chapter, if None, the content of the title tag obtained from the web file will be used as the chapter name.
   * strict (Option[boolean]): Whether to perform strict page cleaning, which will remove inline styles, insignificant attributes, etc., generally True.
 * `Epub(title, creator='dfface', language='en', rights='', publisher='dfface', epub_dir=None)`: Constructor method to create Epub object.Mainly used to add book information and all chapters and generate epub file.
@@ -91,8 +91,9 @@ If we cannot infer the cover image from html string, we will generate one. The r
 * Epub object  `create_epub(output_directory, epub_name=None)`: Create an epub file from the Epub object.
   * output_directory (str): Directory to output the epub file to.
   * epub_name (Option[str]): The file name of your epub. This should not contain .epub at the end. If this argument is not provided, defaults to the title of the epub.
-* `html_clean(input_string, tag_clean_list=constants.TAG_DELETE_LIST, class_list=constants.CLASS_INCLUDE_LIST, tag_dictionary=constants.SUPPORTED_TAGS,)`: The internal default `clean` method we expose for easy customization.
+* `html_clean(input_string, help_url=None, tag_clean_list=constants.TAG_DELETE_LIST, class_list=constants.CLASS_INCLUDE_LIST, tag_dictionary=constants.SUPPORTED_TAGS)`: The internal default `clean` method we expose for easy customization.
   * input_string (str): A string representing HTML / XML.
+  * help_url (Option[str]): current chapter's url, which helps to identify relative links in the web page.
   * tag_dictionary (Option[dict]):  defines all tags and their classes that need to be saved, you can see what the default values are in [SUPPORTED_TAGS](./xml2epub/constants.py).
   * tag_clean_list (Option[list]): defines all tags that need to be deleted. Note that the entire tag and its sub-tags will be deleted directly here. You can see what the default values are in [TAG_DELETE_LIST](./xml2epub/constants.py).
   * class_list (Option[list]): defines all tags containing the content of the class that need to be deleted, that is, as long as the class attribute of any tag contains the content in this list, then the entire tag will be deleted including its sub-tags. You can see what the default values are in [CLASS_INCLUDE_LIST](./xml2epub/constants.py).
