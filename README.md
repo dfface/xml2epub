@@ -12,8 +12,9 @@ Batch convert multiple web pages into one e-book by URL, xml string, etc.
 
 Features:
 * Automatically generate cover: If the `<title>` text in html is one of [COVER_TITLE_LIST](./xml2epub/constants.py), 
-then the cover will be added automatically, otherwise the default cover will be generated.
+then the cover will be added automatically, otherwise the default cover will be generated. We will randomly generate covers with a similar "O'Reilly" style
 * Automatically obtain the core content of the article: we filter the obtained html string and retain the core content. See [SUPPORTED_TAGS](./xml2epub/constants.py) for a list of tags reserved in html.
+
 ## How to install
 
 `xml2epub` is available on pypi

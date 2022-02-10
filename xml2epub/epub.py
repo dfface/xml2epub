@@ -12,8 +12,6 @@ import time
 import tempfile
 import importlib.util as imp
 
-from bs4 import BeautifulSoup
-
 try:
     imp.find_spec('lxml')
     lxml_module_exists = True
@@ -25,10 +23,12 @@ except ImportError:
 
 # Third party modules
 import jinja2
+from bs4 import BeautifulSoup
 
 # Local modules
 from . import chapter
 from . import constants
+from .cover import get_cover_image
 
 
 def get_cover_image_path(html_string):
@@ -350,6 +350,12 @@ class Epub(object):
             epub_name (Option[str]): The file name of your epub. This should not contain
                 .epub at the end. If this argument is not provided, defaults to the title of the epub.
         """
+        def create_cover():
+            """
+            向epub中添加默认的cover.
+            """
+            cover = get_cover_image(title=self.title, author=self.creator, publisher=self.publisher)
+            cover.save(os.path.join(self.OEBPS_DIR, 'img/cover.jpg'))
 
         def createTOCs_and_ContentOPF():
             """
@@ -388,5 +394,6 @@ class Epub(object):
             return epub_full_name
 
         createTOCs_and_ContentOPF()
+        create_cover()
         epub_path = turn_zip_into_epub(create_zip_archive(epub_name))
         return epub_path

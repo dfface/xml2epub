@@ -2,3 +2,4 @@ beautifulsoup4==4.9.3
 Jinja2==3.0.1
 lxml==4.7.1
 requests==2.26.0
+pillow==9.0.1
