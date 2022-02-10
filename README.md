@@ -72,9 +72,21 @@ After waiting for a while, if no error is reported, the following "My New E-book
 * Epub object  `create_epub(output_directory, epub_name=None)`: Create an epub file from the Epub object.
   * output_directory (str): Directory to output the epub file to.
   * epub_name (Option[str]): The file name of your epub. This should not contain .epub at the end. If this argument is not provided, defaults to the title of the epub.
+* `html_clean(input_string, tag_clean_list=constants.TAG_DELETE_LIST, class_list=constants.CLASS_INCLUDE_LIST, tag_dictionary=constants.SUPPORTED_TAGS,)`: The internal default `clean` method we expose for easy customization.
+  * input_string (str): A string representing HTML / XML.
+  * tag_dictionary (Option[dict]):  defines all tags and their classes that need to be saved, you can see what the default values are in [SUPPORTED_TAGS](./xml2epub/constants.py).
+  * tag_clean_list (Option[list]): defines all tags that need to be deleted. Note that the entire tag and its sub-tags will be deleted directly here. You can see what the default values are in [TAG_DELETE_LIST](./xml2epub/constants.py).
+  * class_list (Option[list]): defines all tags containing the content of the class that need to be deleted, that is, as long as the class attribute of any tag contains the content in this list, then the entire tag will be deleted including its sub-tags. You can see what the default values are in [CLASS_INCLUDE_LIST](./xml2epub/constants.py).
 
 ## FAQ
 1. The generated epub has no content?
 > When generating an epub by URL, you need to ensure that the web page corresponding to the URL is a static web page, and you can access all the content without logging in. If the epub you generate is empty when opened, then you may have encountered a website that requires login to access. At this time, you can try to obtain the html string corresponding to the URL, and then use the `create_chapter_from_string` method to generate the epub. That is to say, you need to use a certain crawler technology.
 2. The generated epub contains content I don't want?
 > Although we do some filtering when cleaning the html string, this is not guaranteed to work in all cases. In this case, I recommend that you filter the html string yourself before using `create_chapter_from_string` method.
+3. Want to generate epub directly from html string without sanitizing content?
+> Set the parameter `strict` of `create_chapter_from_string` to `False`, which means that it will not be cleaned up internally.
+4. If you choose to get the html string yourself and clean it up yourself, you can follow these steps:
+   1. Use crawler technology to obtain html strings, such as `requests.get(url).text`.
+   2. Use the `html_clean` method we expose to clean up the string, e.g. `html_clean(html_string, tag_clean_list=['sidebar'])`. Or you can write your own methods to sanitize strings, all just to get clean strings, whatever you want.
+   3. Using the `create_chapter_from_string(html_string, strict=False)` method to generate the Chapter object, pay special attention to the parameter `` to be set to False, which means that our internal cleaning strategy will be skipped.
+   4. After that, you can generate epub according to the basic usage. See [vuepress2epub.py](./examples/vuepress2epub.py) as an example.

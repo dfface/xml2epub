@@ -11,6 +11,7 @@ from bs4 import BeautifulSoup
 # Local modules
 from . import constants
 
+
 def create_html_from_fragment(tag):
     """
     Creates full html tree from a fragment. Assumes that tag should be wrapped in a body and is currently not
@@ -54,8 +55,8 @@ def clean(input_string,
             isn't contained, it will be removed. By default, this is set to
             use the supported tags and attributes for the Amazon Kindle,
             as found at https://kdp.amazon.com/help?topicId=A1JPUWCSD6F59O
-        class_list (Option[dict]): 清理class属性中可能包含该列表中关键字的所有元素
-        tag_clean_list (Option[dict]): 清理该列表中包含的所有 tag 元素及其子元素
+        class_list (Option[list]): 清理class属性中可能包含该列表中关键字的所有元素及其子元素
+        tag_clean_list (Option[list]): 清理该列表中包含的所有 tag 元素及其子元素
 
     Returns:
         str: A (possibly unicode) string representing HTML.
@@ -67,12 +68,16 @@ def clean(input_string,
         assert isinstance(input_string, str)
     except AssertionError:
         raise TypeError
-    # 使用 lxml 更为准确和严格，不要保存 link 元素，很难控制
+    # 使用 lxml 更为准确和严格，默认不保存 link 元素，可自定义删除的tag
     root = BeautifulSoup(input_string, 'lxml')
+    title = root.find('title')  # 暴露出该方法后，防止后面直接提取article的时候title丢失，该方法会执行两次
+    # 如果能找到 article 元素，直接提取该元素
     article_tag = root.find_all('article')
     if article_tag:
         root = article_tag[0]
-    # 删除导航栏、边栏等元素及其子元素
+        if title:
+            root.insert_before(title)
+    # 删除 class_list 中的元素及其子元素，例如导航栏、边栏等元素及其子元素
     for i in class_list:
         to_delete = root.find_all(lambda tag: tag.has_attr('class') and str(tag['class']).find(i) != -1)
         for td in to_delete:
@@ -82,7 +87,7 @@ def clean(input_string,
         to_delete = root.find_all(i)
         for td in to_delete:
             td.extract()
-    # 仅保留 tag 字典中的元素
+    # 仅保留 tag_dictionary 中的元素，子元素可保存
     stack = root.find_all(True, recursive=False)
     while stack:
         current_node = stack.pop()
@@ -98,6 +103,20 @@ def clean(input_string,
                 if attribute not in tag_dictionary[current_node.name]:
                     attribute_dict.pop(attribute)
         stack.extend(child_node_list)
+    # 删除无用的 <link>
+    for i in root.find_all('link'):
+        if (i.has_attr('rel') and i['rel'][0] == 'stylesheet') or \
+                (i.has_attr('type') and i['type'][0] == 'text/css') or (
+                not i.has_attr('type') and not i.has_attr('rel')):
+            continue
+        else:
+            i.extract()
+    # 删除不是 head 中的 <link>
+    for i in root.find_all('link'):
+        for j in i.find_parents():
+            if j.name == 'body':
+                i.extract()
+                break
     # wrap partial tree if necessary
     if not root.find_all('html'):
         root = create_html_from_fragment(root)
@@ -200,3 +219,48 @@ def html_to_xhtml(html_unicode_string):
             '<' + tag + '/>',
             '<' + tag + ' />')
     return unicode_string
+
+
+def html_clean(input_string,
+               tag_clean_list=constants.TAG_DELETE_LIST,
+               class_list=constants.CLASS_INCLUDE_LIST,
+               tag_dictionary=constants.SUPPORTED_TAGS):
+    """
+    Sanitizes HTML / XML. Tags not contained as keys in the tag_dictionary input are
+    removed, and child nodes are recursively moved to parent of removed node.
+    Attributes not contained as arguments in tag_dictionary are removed.
+    Doctype is set to <!DOCTYPE html>.
+
+    Tips:
+        1. Generally, you only need to delete the tags you don't need, you only need to customize the tag_clean_list,
+        and the others can be kept by default.
+        2. tag_dictionary defines all tags and their classes that need to be saved, you can see what the default values
+         are.
+        3. tag_clean_list defines all tags that need to be deleted. Note that the entire tag and its sub-tags will be
+         deleted directly here.
+        4. class_list defines all tags containing the content of the class that need to be deleted, that is, as long
+         as the class attribute of any tag contains the content in this list, then the entire tag will be deleted
+          including its sub-tags.
+
+    Parameters:
+        input_string (basestring): A (possibly unicode) string representing HTML.
+        tag_dictionary (Option[dict]): A dictionary with tags as keys and
+            attributes as values. This operates as a whitelist--i.e. if a tag
+            isn't contained, it will be removed. By default, this is set to
+            use the supported tags and attributes for the Amazon Kindle,
+            as found at https://kdp.amazon.com/help?topicId=A1JPUWCSD6F59O. 定义了需要保存的所有tag及其class，
+            你可以看看默认值都有什么。
+        class_list (Option[list]): defines all tags containing the content of the class that need to be deleted, that
+            is, as long as the class attribute of any tag contains the content in this list, then the entire tag will
+            be deleted including its sub-tags. 清理class属性中可能包含该列表中关键字的所有元素及其子元素。
+        tag_clean_list (Option[list]): defines all tags that need to be deleted. Note that the entire tag and its
+            sub-tags will be deleted directly here. 清理该列表中包含的所有 tag 元素及其子元素。
+
+    Returns:
+        str: A (possibly unicode) string representing HTML.
+
+    Raises:
+        TypeError: Raised if input_string isn't a unicode string or string.
+    """
+    html_string = clean(input_string, tag_dictionary, tag_clean_list, class_list)
+    return html_to_xhtml(html_string)
