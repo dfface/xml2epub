@@ -12,7 +12,7 @@ Batch convert multiple web pages into one e-book by URL, xml string, etc.
 
 Features:
 * Automatically generate cover: If the `<title>` text in html is one of [COVER_TITLE_LIST](./xml2epub/constants.py), 
-then the cover will be added automatically, otherwise the default cover will be generated. We will randomly generate covers with a similar "O'Reilly" style
+then the cover will be added automatically, otherwise the default cover will be generated. We will randomly generate the cover image with a similar "O'Reilly" style.
 * Automatically obtain the core content of the article: we filter the obtained html string and retain the core content. See [SUPPORTED_TAGS](./xml2epub/constants.py) for a list of tags reserved in html.
 
 ## How to install
@@ -32,9 +32,13 @@ import xml2epub
 ## create an empty eBook
 book = xml2epub.Epub("My New E-book Name")
 ## create chapters by url
+#### custom your own cover image
+chapter0 = xml2epub.create_chapter_from_string("https://cdn.jsdelivr.net/gh/dfface/img0@master/2022/02-10-0R7kll.png", title='cover', strict=False)
+#### create chapter objects
 chapter1 = xml2epub.create_chapter_from_url("https://dev.to/devteam/top-7-featured-dev-posts-from-the-past-week-h6h")
 chapter2 = xml2epub.create_chapter_from_url("https://dev.to/ks1912/getting-started-with-docker-34g6")
 ## add chapters to your eBook
+book.add_chapter(chapter0)
 book.add_chapter(chapter1)
 book.add_chapter(chapter2)
 ## generate epub file
@@ -44,6 +48,12 @@ book.create_epub("Your Output Directory")
 After waiting for a while, if no error is reported, the following "My New E-book Name.epub" file will be generated in "Your Output Directory":
 
 ![The generated epub file](https://cdn.jsdelivr.net/gh/dfface/img0@master/2022/02-09-Guz0bl.png)
+
+For more examples, see: [examples](./examples) directory.
+
+If we cannot infer the cover image from html string, we will generate one. The randomly generated cover image is a similar "O'Reilly" style: 
+
+![The generated cover image](https://cdn.jsdelivr.net/gh/dfface/img0@master/2022/02-10-0R7kll.png)
 
 ## API
 
@@ -55,8 +65,8 @@ After waiting for a while, if no error is reported, the following "My New E-book
 * `create_chapter_from_url(url, title=None, strict=True)`: Create a Chapter object by extracting webpage from given url.
   * url (string): website link.
   * title (Option[string]): The chapter name of the chapter, if None, the content of the title tag obtained from the web file will be used as the chapter name.
-  * strict (Option[boolean]): Whether to perform strict page cleaning, which will remove inline styles, insignificant attributes, etc., generally True.
-* `create_chapter_from_string(html_string, url=None, title=None, strict=True)`: Create a Chapter object from a string. The principle of the above two methods is to first obtain the html or xml string, and then call this method.
+  * strict (Option[boolean]): Whether to perform strict page cleaning, which will remove inline styles, insignificant attributes, etc., generally True. When False, you can enter an image link and specify title, which is helpful for custom cover image.
+* `create_chapter_from_string(html_string, url=None, title=None, strict=True)`: Create a Chapter object from a string. The principle of the above two methods is to first obtain the html or xml string, and then call this method. 
   * html_string (string): html or xhtml string.
   * url (Option[string]): The url used to infer the chapter title.
   * title (Option[string]): The chapter name of the chapter, if None, the content of the title tag obtained from the web file will be used as the chapter name.
@@ -79,7 +89,16 @@ After waiting for a while, if no error is reported, the following "My New E-book
   * tag_clean_list (Option[list]): defines all tags that need to be deleted. Note that the entire tag and its sub-tags will be deleted directly here. You can see what the default values are in [TAG_DELETE_LIST](./xml2epub/constants.py).
   * class_list (Option[list]): defines all tags containing the content of the class that need to be deleted, that is, as long as the class attribute of any tag contains the content in this list, then the entire tag will be deleted including its sub-tags. You can see what the default values are in [CLASS_INCLUDE_LIST](./xml2epub/constants.py).
 
+## Tips
+
+* If you want to add a cover image yourself, use the `create_chapter_from_string` method, then assign `html_string` to the URL of the image, and keep the `title=cover` and `strict=False` parameters.
+* If you want to clean the web content yourself, first use the crawler to get the html string, then use the exposed `html_clean` method (it is recommended to add the values of `tag_clean_list`, `class_clean_list` and `url`) and assign the output to the `create_chapter_from_string` method `html_string` parameter while keeping `strict=False`.
+* No matter which method, when using `create_chapter_*` and `strict=False` , it is recommended to bring the `url` parameter, which helps to identify relative links in the web page.
+* Whenever you use the `html_clean` method, it is recommended to include the `help_url` parameter, which helps to identify relative links in web pages.
+* After generating the epub, it is better to use [calibre](https://calibre-ebook.com/) to convert the `epub` to a more standards-compliant `epub`/`mobi`/`azw3` to solve the problem that the epub cannot be read in some software. And if the generated epub has style problems, you can also use calibre to edit the ebook and **adjust the style** to suit your reading habits.
+
 ## FAQ
+
 1. The generated epub has no content?
 > When generating an epub by URL, you need to ensure that the web page corresponding to the URL is a static web page, and you can access all the content without logging in. If the epub you generate is empty when opened, then you may have encountered a website that requires login to access. At this time, you can try to obtain the html string corresponding to the URL, and then use the `create_chapter_from_string` method to generate the epub. That is to say, you need to use a certain crawler technology.
 2. The generated epub contains content I don't want?

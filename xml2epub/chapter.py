@@ -268,12 +268,9 @@ class Chapter(object):
 
     def _get_image_urls(self):
         image_nodes = self._content_tree.find_all('img')
-        raw_image_urls = [node['src']
-                          for node in image_nodes if node.has_attr('src')]
-        full_image_urls = [urljoin(
-            self.url, image_url) for image_url in raw_image_urls]
-        image_nodes_filtered = [
-            node for node in image_nodes if node.has_attr('src')]
+        raw_image_urls = [node['src'] for node in image_nodes if node.has_attr('src')]
+        full_image_urls = [urljoin(self.url, image_url) for image_url in raw_image_urls]
+        image_nodes_filtered = [node for node in image_nodes if node.has_attr('src')]
         return zip(image_nodes_filtered, full_image_urls)
 
     def _get_css_urls(self):
@@ -347,10 +344,6 @@ class ChapterFactory(object):
         Raises:
             ValueError: 如果无法连接该url则触发此 Error.
         """
-        if strict is True:
-            self.clean_function = clean.clean
-        else:
-            self.clean_function = clean.clean_not_strict
         try:
             request_object = requests.get(
                 url, headers=self.request_headers, allow_redirects=False)
@@ -362,8 +355,7 @@ class ChapterFactory(object):
                 "%s is an invalid url or no network connection" % url)
         request_object.encoding = 'utf-8'
         unicode_string = request_object.text
-        # 这里对文章进行清理，只选择 article 正文，不要导航栏这些
-        return self.create_chapter_from_string(unicode_string, url, title)
+        return self.create_chapter_from_string(unicode_string, url, title, strict)
 
     def create_chapter_from_file(self, file_name, url=None, title=None, strict=True):
         """
@@ -379,13 +371,9 @@ class ChapterFactory(object):
         Returns:
             Chapter: 一个Chapter对象, 其内容是给定html或xhtml文件的内容.
         """
-        if strict is True:
-            self.clean_function = clean.clean
-        else:
-            self.clean_function = clean.clean_not_strict
         with codecs.open(file_name, 'r', encoding='utf-8') as f:
             content_string = f.read()
-        return self.create_chapter_from_string(content_string, url, title)
+        return self.create_chapter_from_string(content_string, url, title, strict)
 
     def create_chapter_from_string(self, html_string, url=None, title=None, strict=True):
         """
@@ -394,7 +382,7 @@ class ChapterFactory(object):
 
         Parameters:
             html_string (string): 创建的chapter的html或xhtml内容.
-            url (Option[string]): 推断章节标题的url
+            url (Option[string]): 推断章节标题的url，也是用于辅助替换相对资源的url
             title (Option[string]): chapter的章节名, 如果为None, 则使用从文本中获取的 title标签 的内容作为章节名.
             strict : html 清洗的标准是否严格，严格（True）则需要进行过滤，非严格（False）模式直接使用原 html
         Returns:
@@ -404,7 +392,7 @@ class ChapterFactory(object):
             self.clean_function = clean.clean
         else:
             self.clean_function = clean.clean_not_strict
-        clean_html_string = self.clean_function(html_string)
+        clean_html_string = self.clean_function(html_string, url, title)
         clean_xhtml_string = clean.html_to_xhtml(clean_html_string)
         if title:
             pass

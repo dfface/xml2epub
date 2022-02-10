@@ -7,9 +7,43 @@ import re
 # Third party modules
 import bs4
 from bs4 import BeautifulSoup
+from urllib.parse import urlparse, urljoin
 
 # Local modules
 from . import constants
+
+
+def relative_url_replace(tag, help_url):
+    """
+    将网页中的相对链接（如 '/assets/a.jpg' ），替换为绝对链接（如 'https://www.a.com/assets/a.jpg'）
+        help_url: 当前页面的 url
+        tag：当前的 bs 元素
+    """
+    if help_url is None:
+        return tag
+    href_urls = tag.find_all(lambda x: x.has_attr('href'))
+    src_urls = tag.find_all(lambda x: x.has_attr('src'))
+    for i in href_urls:
+        if urlparse(i['href']).scheme == '':
+            if urlparse(help_url).scheme == '':
+                break
+            else:
+                if str(i['href']).startswith('/'):
+                    i['href'] = urljoin(urlparse(help_url).scheme + '://' + urlparse(help_url).netloc, i['href'])
+                elif str(i['href']).startswith('#'):
+                    continue
+                else:
+                    i['href'] = urljoin(help_url, i['href'])
+    for i in src_urls:
+        if urlparse(i['src']).scheme == '':
+            if urlparse(help_url).scheme == '':
+                break
+            else:
+                if str(i['src']).startswith('/'):
+                    i['src'] = urljoin(urlparse(help_url).scheme + '://' + urlparse(help_url).netloc, i['src'])
+                else:
+                    i['src'] = urljoin(help_url, i['src'])
+    return tag
 
 
 def create_html_from_fragment(tag):
@@ -38,7 +72,7 @@ def create_html_from_fragment(tag):
     return soup
 
 
-def clean(input_string,
+def clean(input_string, help_url=None, title=None,
           tag_dictionary=constants.SUPPORTED_TAGS,
           tag_clean_list=constants.TAG_DELETE_LIST,
           class_list=constants.CLASS_INCLUDE_LIST):
@@ -50,6 +84,7 @@ def clean(input_string,
 
     Parameters:
         input_string (basestring): A (possibly unicode) string representing HTML.
+        help_url (Option[str]): 当前页面的 url ，用于辅助替换页面中所有的相对资源
         tag_dictionary (Option[dict]): A dictionary with tags as keys and
             attributes as values. This operates as a whitelist--i.e. if a tag
             isn't contained, it will be removed. By default, this is set to
@@ -117,6 +152,13 @@ def clean(input_string,
             if j.name == 'body':
                 i.extract()
                 break
+    # 相对资源的替换
+    root = relative_url_replace(root, help_url)
+    # 懒加载图片资源的替换
+    all_imgs = root.find_all('img')
+    for i in all_imgs:
+        if i.has_attr('data-src') and not i.has_attr('src'):
+            i['src'] = i['data-src']
     # wrap partial tree if necessary
     if not root.find_all('html'):
         root = create_html_from_fragment(root)
@@ -135,26 +177,35 @@ def clean(input_string,
     return unformatted_html_unicode_string
 
 
-def clean_not_strict(input_string):
+def clean_not_strict(input_string, help_url=None, title=None):
     """
     直接保留原 html ，因为原 html 足够合适
-    如果 Input_string 是图片，则直接插入图片
-    :param input_string: html、image_url
+    如果 Input_string 是图片，则直接插入图片，于是可以利用这个特性手动添加第一页的封面
+        input_string: html、image_url
+        help_url (Option[str]): 当前页面的 url ，用于辅助替换页面中所有的相对资源
     """
     try:
         assert isinstance(input_string, str)
     except AssertionError:
         raise TypeError
     is_img = False
-    for ending in ['jpg', 'jpeg', 'gif' 'png']:
+    for ending in ['jpg', 'jpeg', 'gif', 'png']:
         if input_string.endswith(ending):
             is_img = True
     if is_img:
-        root = create_html_from_fragment(BeautifulSoup(f'<img src="{input_string}" />').img)
+        root = create_html_from_fragment(BeautifulSoup(f'<img src="{input_string}" />', 'html.parser').img)
+        title_tag = root.new_tag(name='title')
+        if title is not None:
+            title_tag.string = title
+        else:
+            title_tag.string = 'cover'
+        root.find('head').append(title_tag)
     else:
         root = BeautifulSoup(input_string, 'html.parser')
         if not root.find_all('html'):
             root = create_html_from_fragment(root)
+    # 相对资源的替换
+    root = relative_url_replace(root, help_url)
     unformatted_html_unicode_string = root.prettify()
     unformatted_html_unicode_string = unformatted_html_unicode_string.replace(
         '<br>', '<br/>')
@@ -221,9 +272,9 @@ def html_to_xhtml(html_unicode_string):
     return unicode_string
 
 
-def html_clean(input_string,
+def html_clean(input_string, help_url=None,
                tag_clean_list=constants.TAG_DELETE_LIST,
-               class_list=constants.CLASS_INCLUDE_LIST,
+               class_clean_list=constants.CLASS_INCLUDE_LIST,
                tag_dictionary=constants.SUPPORTED_TAGS):
     """
     Sanitizes HTML / XML. Tags not contained as keys in the tag_dictionary input are
@@ -244,6 +295,7 @@ def html_clean(input_string,
 
     Parameters:
         input_string (basestring): A (possibly unicode) string representing HTML.
+        help_url (Option[str]): 当前页面的 url ，用于辅助替换页面中所有的相对资源.
         tag_dictionary (Option[dict]): A dictionary with tags as keys and
             attributes as values. This operates as a whitelist--i.e. if a tag
             isn't contained, it will be removed. By default, this is set to
@@ -262,5 +314,5 @@ def html_clean(input_string,
     Raises:
         TypeError: Raised if input_string isn't a unicode string or string.
     """
-    html_string = clean(input_string, tag_dictionary, tag_clean_list, class_list)
+    html_string = clean(input_string, help_url=help_url, tag_dictionary=tag_dictionary, tag_clean_list=tag_clean_list, class_list=class_clean_list)
     return html_to_xhtml(html_string)
