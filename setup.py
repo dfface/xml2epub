@@ -14,7 +14,7 @@ setup(
     long_description_content_type="text/markdown",
     url='https://github.com/dfface/xml2epub',
     packages=['xml2epub'],
-    package_data={'xml2epub': ['epub_templates/*', 'epub_cover/*']},
+    package_data={'xml2epub': ['epub_templates/*', 'epub_cover/*', 'epub_cover/animals/*']},
     classifiers=[
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
