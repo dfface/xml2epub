@@ -5,7 +5,7 @@ with open("README.md", "r", encoding='utf-8') as fh:
 
 setup(
     name='xml2epub',
-    version='2.3',
+    version='2.4',
     author='dfface',
     author_email='dfface@sina.com',
     keywords="convert html url export epub",

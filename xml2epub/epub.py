@@ -51,6 +51,9 @@ def get_cover_image_path(html_string):
             if first_img is not None and re.match(r'.*({}).*'.format(cover_title), first_img['href'],
                                                   re.I) is not None:
                 cover_include = True
+            # 如果第一张图的 class 包含 fullscreen
+            if first_img is not None and 'fullscreen' in first_img['class']:
+                cover_include = True
         if cover_include and first_img['src'] is not None:
             return first_img['src']
 
