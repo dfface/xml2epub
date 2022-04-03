@@ -108,6 +108,7 @@ If we cannot infer the cover image from html string, we will generate one. The r
 * No matter which method, when using `create_chapter_*` and `strict=False` , it is recommended to bring the `url` parameter, which helps to identify relative links in the web page.
 * Whenever you use the `html_clean` method, it is recommended to include the `help_url` parameter, which helps to identify relative links in web pages.
 * After generating the epub, it is better to use [calibre](https://calibre-ebook.com/) to convert the `epub` to a more standards-compliant `epub`/`mobi`/`azw3` to solve the problem that the epub cannot be read in some software. And if the generated epub has style problems, you can also use calibre to edit the ebook and **adjust the style** to suit your reading habits.
+* If the images and CSS files in your html are local resources, please set the `local` parameter in `create_chapter_*` to `True`, then the program will automatically copy the local resources instead of getting them from the Internet.
 
 ## FAQ
 
