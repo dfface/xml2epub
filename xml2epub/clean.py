@@ -181,7 +181,7 @@ def clean_not_strict(input_string, help_url=None, title=None):
     """
     直接保留原 html ，因为原 html 足够合适
     如果 Input_string 是图片，则直接插入图片，于是可以利用这个特性手动添加第一页的封面
-        input_string: html、image_url
+        input_string: html、image_url、image_file_path
         help_url (Option[str]): 当前页面的 url ，用于辅助替换页面中所有的相对资源
     """
     try:

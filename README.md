@@ -57,7 +57,7 @@ After waiting for a while, if no error is reported, the following "My New E-book
 
 ![The generated epub file](https://cdn.jsdelivr.net/gh/dfface/img0@master/2022/02-09-Guz0bl.png)
 
-For more examples, see: [examples](./examples) directory.
+For more **examples**, see: [examples](./examples) directory.
 
 If we cannot infer the cover image from html string, we will generate one. The randomly generated cover image is a similar "O'Reilly" style: 
 
@@ -70,15 +70,18 @@ If we cannot infer the cover image from html string, we will generate one. The r
   * url (Option[string]): The url used to infer the chapter title. It is recommended to bring the `url` parameter, which helps to identify relative links in the web page.
   * title (Option[string]): The chapter name of the chapter, if None, the content of the title tag obtained from the web file will be used as the chapter name.
   * strict (Option[boolean]): Whether to perform strict page cleaning, which will remove inline styles, insignificant attributes, etc., generally True.
+  * local (Option[boolean]):  Whether to use local resources, which means that all images and css files in html have been saved locally, and the resources will be copied directly using the file path in html instead of getting them from the Internet.
 * `create_chapter_from_url(url, title=None, strict=True)`: Create a Chapter object by extracting webpage from given url.
   * url (string): website link. It is recommended to bring the `url` parameter, which helps to identify relative links in the web page.
   * title (Option[string]): The chapter name of the chapter, if None, the content of the title tag obtained from the web file will be used as the chapter name.
   * strict (Option[boolean]): Whether to perform strict page cleaning, which will remove inline styles, insignificant attributes, etc., generally True. When False, you can enter an image link and specify title, which is helpful for custom cover image.
+  * local (Option[boolean]):  Whether to use local resources, which means that all images and css files in html have been saved locally, and the resources will be copied directly using the file path in html instead of getting them from the Internet.
 * `create_chapter_from_string(html_string, url=None, title=None, strict=True)`: Create a Chapter object from a string. The principle of the above two methods is to first obtain the html or xml string, and then call this method. 
   * html_string (string): html or xhtml string.
   * url (Option[string]): The url used to infer the chapter title. It is recommended to bring the `url` parameter, which helps to identify relative links in the web page.
   * title (Option[string]): The chapter name of the chapter, if None, the content of the title tag obtained from the web file will be used as the chapter name.
   * strict (Option[boolean]): Whether to perform strict page cleaning, which will remove inline styles, insignificant attributes, etc., generally True.
+  * local (Option[boolean]):  Whether to use local resources, which means that all images and css files in html have been saved locally, and the resources will be copied directly using the file path in html instead of getting them from the Internet.
 * `Epub(title, creator='dfface', language='en', rights='', publisher='dfface', epub_dir=None)`: Constructor method to create Epub object.Mainly used to add book information and all chapters and generate epub file.
   * title (str): The [title](http://kb.daisy.org/publishing/docs/epub/title.html) of the epub.
   * creator (Option[str]): The [author](http://kb.daisy.org/publishing/docs/html/dpub-aria/doc-credit.html) of the epub.
@@ -100,7 +103,7 @@ If we cannot infer the cover image from html string, we will generate one. The r
 
 ## Tips
 
-* If you want to add a cover image yourself, use the `create_chapter_from_string` method, then assign `html_string` to the URL of the image, and keep the `title=cover` and `strict=False` parameters.
+* If you want to add a cover image yourself, use the `create_chapter_from_string` method, then assign `html_string` to the image URL (e.g. `https://www.xxx.com/xxx.png`) and keep the `strict=False` parameter. Or assign `html_string` to the local image file path (e.g. `./xxx.png`) and keep the `local=True` and `strict=False` parameters.
 * If you want to clean the web content yourself, first use the crawler to get the html string, then use the exposed `html_clean` method (it is recommended to add the values of `tag_clean_list`, `class_clean_list` and `url`) and assign the output to the `create_chapter_from_string` method `html_string` parameter while keeping `strict=False`.
 * No matter which method, when using `create_chapter_*` and `strict=False` , it is recommended to bring the `url` parameter, which helps to identify relative links in the web page.
 * Whenever you use the `html_clean` method, it is recommended to include the `help_url` parameter, which helps to identify relative links in web pages.
@@ -118,4 +121,4 @@ If we cannot infer the cover image from html string, we will generate one. The r
    1. Use crawler technology to obtain html strings, such as `requests.get(url).text`.
    2. Use the `html_clean` method we expose to clean up the string, e.g. `html_clean(html_string, tag_clean_list=['sidebar'])`. Or you can write your own methods to sanitize strings, all just to get clean strings, whatever you want.
    3. Using the `create_chapter_from_string(html_string, strict=False)` method to generate the Chapter object, pay special attention to the parameter `` to be set to False, which means that our internal cleaning strategy will be skipped.
-   4. After that, you can generate epub according to the basic usage. See [vuepress2epub.py](./examples/vuepress2epub.py) as an example.
+   4. After that, you can generate epub according to the basic usage. See [vuepress2epub.py](examples/vuepress2epub/vuepress2epub.py) as an example.

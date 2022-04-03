@@ -2,7 +2,7 @@
 
 ## Update
 
-**中文文档不再更新**.
+**中文文档不再更新，请直接查看英文文档，包含了 API 的介绍**.
 
 * version 2.1 时，本文档仅增加了 Tips 和 FAQ，其他内容为 version 2.0 之前的内容。
 
@@ -27,7 +27,7 @@
          * tag_clean_list 定义了需要删除的所有tag，注意这里会直接删除整个tag及其子tag。 
          * class_list 定义了需要删除的所有包含该class内容的tag，也即只要任何一个tag的class属性包含这个列表中的内容，那么这整个tag都会被删除包括其子tag。
       3. 利用`create_chapter_from_string(html_string, strict=False)`方法，特别注意其中的参数``要设置为False，表示会略过我们内部的清理策略。
-   2. 一个自定义的例子如 [vuepress2epub.py](./examples/vuepress2epub.py) 所示。
+   2. 一个自定义的例子如 [vuepress2epub.py](examples/vuepress2epub/vuepress2epub.py) 所示。
 3. 如何添加自定义封面？
    1. 利用`create_chapter_from_string(html_string, title='cover', strict=False)`方法（注意strict保持为False），其中 string 直接输入图片的 url 即可，注意传入 title 为 cover。
    2. 以上操作就是将封面单独作为一个章节。

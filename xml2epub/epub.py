@@ -30,6 +30,10 @@ from . import chapter
 from . import constants
 from .cover import get_cover_image
 
+# 去除 Warning
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning, module='bs4')
+
 
 def get_cover_image_path(html_string):
     """
@@ -48,11 +52,11 @@ def get_cover_image_path(html_string):
             if first_img is not None and str(title.upper()).find(cover_title.upper()) != -1:
                 cover_include = True
             # 如果第一张图的src 或 href 包含 封面 二字
-            if first_img is not None and re.match(r'.*({}).*'.format(cover_title), first_img['href'],
-                                                  re.I) is not None:
+            if first_img is not None and first_img.has_attr('href') and re.match(r'.*({}).*'.format(cover_title),
+                                                                                 first_img['href'], re.I) is not None:
                 cover_include = True
             # 如果第一张图的 class 包含 fullscreen
-            if first_img is not None and 'fullscreen' in first_img['class']:
+            if first_img is not None and first_img.has_attr('class') and 'fullscreen' in first_img['class']:
                 cover_include = True
         if cover_include and first_img['src'] is not None:
             return first_img['src']

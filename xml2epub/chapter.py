@@ -98,110 +98,6 @@ def download_resource(url, path):
             break
 
 
-def save_css(css_url, css_directory, css_name):
-    full_css_path = os.path.join(css_directory, css_name + '.css')
-    # 如果存在则什么也不做
-    if os.path.exists(full_css_path):
-        return
-    # 否则请求下载
-    download_resource(css_url, full_css_path)
-
-
-def save_image(image_url, image_directory, image_name):
-    """
-    保存在线图片到指定的路径, 可自定义文件名.
-
-    Parameters:
-        image_url (str): image路径.
-        image_directory (str): 保存image的路径.
-        image_name (str): image的文件名(无后缀).
-
-    Raises:
-        ResourceErrorException: 在无法保存该图片时触发该 Error.
-
-    Returns:
-        str: 图片的类型.
-    """
-    image_type = get_image_type(image_url)
-    if image_type is None:
-        raise ResourceErrorException(image_url)
-    full_image_file_name = os.path.join(
-        image_directory, image_name + '.' + image_type)
-    # If the image is present on the local filesystem just copy it
-    if os.path.exists(image_url):
-        shutil.copy(image_url, full_image_file_name)
-        return image_type
-    # 如果存在则略过
-    if os.path.exists(full_image_file_name):
-        return image_type
-    # 否则下载
-    download_resource(image_url, full_image_file_name)
-    return image_type
-
-
-def _replace_css(css_url, css_tag, ebook_folder, css_name=None):
-    try:
-        assert isinstance(css_tag, bs4.element.Tag)
-    except AssertionError:
-        raise TypeError("css_tag cannot be of type " + str(type(css_tag)))
-    if css_name is None:
-        css_name = md5(css_url.encode('utf-8')).hexdigest()
-    try:
-        css_dir_path = os.path.join(ebook_folder, 'css')
-        assert os.path.exists(css_dir_path)
-        save_css(css_url, css_dir_path, css_name)
-        css_link = 'css' + '/' + css_name + '.css'
-        css_tag['href'] = css_link
-        return css_link, css_name, 'css'
-    except ResourceErrorException:
-        css_tag.decompose()
-    except AssertionError:
-        raise ValueError(
-            '%s doesn\'t exist or doesn\'t contain a subdirectory css' % ebook_folder)
-    except TypeError:
-        css_tag.decompose()
-
-
-def _replace_image(image_url, image_tag, ebook_folder,
-                   image_name=None):
-    """
-    将 image_tag 中的image下载到本地, 并将 image_tag 中img的src修改为本地src.
-
-    Parameters:
-        image_url (str): image的url.
-        image_tag (bs4.element.Tag): bs4中包含image的tag.
-        ebook_folder (str): 将外部图片保存到本地的地址. 内部一定要包含一个名为 "img" 的文件夹.
-        image_name (Option[str]): 保存到本地的imgae的文件名(不包含后缀).
-
-    Returns:
-        str: image本地链接地址
-        str: image的文件名(不包含后缀)
-        str: image的类型 {'jpg', 'jpge', 'gif', 'png'} .
-    """
-    try:
-        assert isinstance(image_tag, bs4.element.Tag)
-    except AssertionError:
-        raise TypeError("image_tag cannot be of type " + str(type(image_tag)))
-    if image_name is None:
-        image_name = md5(image_url.encode('utf-8')).hexdigest()
-    try:
-        image_full_path = os.path.join(ebook_folder, 'img')
-        assert os.path.exists(image_full_path)
-        image_extension = save_image(image_url, image_full_path,
-                                     image_name)
-        image_link = 'img' + '/' + image_name + '.' + image_extension
-        image_tag['src'] = image_link
-        image_tag['href'] = image_link
-        return image_link, image_name, image_extension
-    except ResourceErrorException:
-        image_tag.decompose()
-    except AssertionError:
-        raise ValueError(
-            '%s doesn\'t exist or doesn\'t contain a subdirectory img' % ebook_folder)
-    except TypeError:
-        image_tag.decompose()
-
-
 class Chapter(object):
     """
     chapter对象类. 不能直接调用, 应该用 ChapterFactor() 去实例化chapter.
@@ -218,12 +114,13 @@ class Chapter(object):
         html_title (str): 将特殊字符替换为html安全序列的标题字符串.
     """
 
-    def __init__(self, content, title, url=None):
+    def __init__(self, content, title, url=None, local=False):
         self._validate_input_types(content, title)
         self.title = title
         self.content = content
         self._content_tree = BeautifulSoup(self.content, 'html.parser')
         self.url = url
+        self.local = local
         self.html_title = html.escape(self.title, quote=True)
         self.imgs = []
         self.css = []
@@ -266,6 +163,114 @@ class Chapter(object):
         else:
             raise NoUrlError()
 
+    def save_css(self, css_url, css_directory, css_name):
+        full_css_path = os.path.join(css_directory, css_name + '.css')
+        # 如果存在则什么也不做
+        if os.path.exists(full_css_path):
+            return
+        # 如果开启本地模式，则直接从本地复制
+        if self.local:
+            shutil.copy(css_url, full_css_path)
+            return
+        # 否则请求下载
+        download_resource(css_url, full_css_path)
+
+    def save_image(self, image_url, image_directory, image_name):
+        """
+        保存在线图片到指定的路径, 可自定义文件名.
+
+        Parameters:
+            image_url (str): image路径.
+            image_directory (str): 保存image的路径.
+            image_name (str): image的文件名(无后缀).
+
+        Raises:
+            ResourceErrorException: 在无法保存该图片时触发该 Error.
+
+        Returns:
+            str: 图片的类型.
+        """
+        image_type = get_image_type(image_url)
+        if image_type is None:
+            raise ResourceErrorException(image_url)
+        full_image_file_name = os.path.join(
+            image_directory, image_name + '.' + image_type)
+        # If the image is present on the local filesystem just copy it
+        if os.path.exists(image_url):
+            shutil.copy(image_url, full_image_file_name)
+            return image_type
+        # 如果存在则略过
+        if os.path.exists(full_image_file_name):
+            return image_type
+        # 如果开启本地模式，则直接从本地复制
+        if self.local:
+            shutil.copy(image_url, full_image_file_name)
+            return image_type
+        # 否则下载
+        download_resource(image_url, full_image_file_name)
+        return image_type
+
+    def _replace_css(self, css_url, css_tag, ebook_folder, css_name=None):
+        try:
+            assert isinstance(css_tag, bs4.element.Tag)
+        except AssertionError:
+            raise TypeError("css_tag cannot be of type " + str(type(css_tag)))
+        if css_name is None:
+            css_name = md5(css_url.encode('utf-8')).hexdigest()
+        try:
+            css_dir_path = os.path.join(ebook_folder, 'css')
+            assert os.path.exists(css_dir_path)
+            self.save_css(css_url, css_dir_path, css_name)
+            css_link = 'css' + '/' + css_name + '.css'
+            css_tag['href'] = css_link
+            return css_link, css_name, 'css'
+        except ResourceErrorException:
+            css_tag.decompose()
+        except AssertionError:
+            raise ValueError(
+                '%s doesn\'t exist or doesn\'t contain a subdirectory css' % ebook_folder)
+        except TypeError:
+            css_tag.decompose()
+
+    def _replace_image(self, image_url, image_tag, ebook_folder,
+                       image_name=None):
+        """
+        将 image_tag 中的image下载到本地, 并将 image_tag 中img的src修改为本地src.
+
+        Parameters:
+            image_url (str): image的url.
+            image_tag (bs4.element.Tag): bs4中包含image的tag.
+            ebook_folder (str): 将外部图片保存到本地的地址. 内部一定要包含一个名为 "img" 的文件夹.
+            image_name (Option[str]): 保存到本地的imgae的文件名(不包含后缀).
+
+        Returns:
+            str: image本地链接地址
+            str: image的文件名(不包含后缀)
+            str: image的类型 {'jpg', 'jpge', 'gif', 'png'} .
+        """
+        try:
+            assert isinstance(image_tag, bs4.element.Tag)
+        except AssertionError:
+            raise TypeError("image_tag cannot be of type " + str(type(image_tag)))
+        if image_name is None:
+            image_name = md5(image_url.encode('utf-8')).hexdigest()
+        try:
+            image_full_path = os.path.join(ebook_folder, 'img')
+            assert os.path.exists(image_full_path)
+            image_extension = self.save_image(image_url, image_full_path,
+                                         image_name)
+            image_link = 'img' + '/' + image_name + '.' + image_extension
+            image_tag['src'] = image_link
+            image_tag['href'] = image_link
+            return image_link, image_name, image_extension
+        except ResourceErrorException:
+            image_tag.decompose()
+        except AssertionError:
+            raise ValueError(
+                '%s doesn\'t exist or doesn\'t contain a subdirectory img' % ebook_folder)
+        except TypeError:
+            image_tag.decompose()
+
     def _get_image_urls(self):
         image_nodes = self._content_tree.find_all('img')
         raw_image_urls = [node['src'] for node in image_nodes if node.has_attr('src')]
@@ -287,7 +292,7 @@ class Chapter(object):
     def replace_css_in_chapter(self, ebook_folder):
         css_url_list = self._get_css_urls()
         for css_tag, css_url in css_url_list:
-            css_info = _replace_css(
+            css_info = self._replace_css(
                 css_url, css_tag, ebook_folder)
             if css_info is not None:
                 css_link, css_id, css_type = css_info
@@ -302,7 +307,7 @@ class Chapter(object):
     def replace_images_in_chapter(self, ebook_folder):
         image_url_list = self._get_image_urls()
         for image_tag, image_url in image_url_list:
-            img_info = _replace_image(
+            img_info = self._replace_image(
                 image_url, image_tag, ebook_folder)
             if img_info is not None:
                 img_link, img_id, img_type = img_info
@@ -327,7 +332,7 @@ class ChapterFactory(object):
         user_agent = r'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:31.0) Gecko/20100101 Firefox/31.0'
         self.request_headers = {'User-Agent': user_agent}
 
-    def create_chapter_from_url(self, url, title=None, strict=True):
+    def create_chapter_from_url(self, url, title=None, strict=True, local=False):
         """
         从URL创建chapter对象. 
         从给定的url中提取网页, 使用clean_function方法对其进行清理, 并将其另存为创建的chpter的内容.
@@ -338,6 +343,7 @@ class ChapterFactory(object):
             title (Option[string]): chapter的章节名, 如果为None, 则使用从网页中获取的 title标签 的内容作为章节名.
             strict(Option[string]): Whether to perform strict page cleaning, which will remove inline styles,
              insignificant attributes, etc., generally True.
+            local (Option[bool]): html中的图片、CSS等是否为本地资源，True表示本地资源直接从本地复制而不去网络上下载，False表示网络资源
         Returns:
             Chapter: 一个Chapter对象, 其内容是给定url的网页. 
 
@@ -355,9 +361,9 @@ class ChapterFactory(object):
                 "%s is an invalid url or no network connection" % url)
         request_object.encoding = 'utf-8'
         unicode_string = request_object.text
-        return self.create_chapter_from_string(unicode_string, url, title, strict)
+        return self.create_chapter_from_string(unicode_string, url, title, strict, local)
 
-    def create_chapter_from_file(self, file_name, url=None, title=None, strict=True):
+    def create_chapter_from_file(self, file_name, url=None, title=None, strict=True, local=False):
         """
         从html或xhtml文件创建chapter对象.
         使用clean_function方法清理文件的内容, 并将其另存为创建的chapter的内容.
@@ -368,23 +374,25 @@ class ChapterFactory(object):
             title (Option[string]): chapter的章节名, 如果为None, 则使用从网页文件中获取的 title标签 的内容作为章节名.
             strict (Option[string]) : Whether to perform strict page cleaning, which will remove inline styles,
              insignificant attributes, etc., generally True.
+            local (Option[bool]): html中的图片、CSS等是否为本地资源，True表示本地资源直接从本地复制而不去网络上下载，False表示网络资源
         Returns:
             Chapter: 一个Chapter对象, 其内容是给定html或xhtml文件的内容.
         """
         with codecs.open(file_name, 'r', encoding='utf-8') as f:
             content_string = f.read()
-        return self.create_chapter_from_string(content_string, url, title, strict)
+        return self.create_chapter_from_string(content_string, url, title, strict, local)
 
-    def create_chapter_from_string(self, html_string, url=None, title=None, strict=True):
+    def create_chapter_from_string(self, html_string, url=None, title=None, strict=True, local=False):
         """
         从字符串创建chapter对象.
         使用clean_function方法清理字符串, 并将其另存为创建的chapter的内容.
 
         Parameters:
-            html_string (string): 创建的chapter的html或xhtml内容.
+            html_string (string): 创建的chapter的html或xhtml内容.还可能是图片的URL、本地路径，需与title=cover，strict=False配合
             url (Option[string]): 推断章节标题的url，也是用于辅助替换相对资源的url
             title (Option[string]): chapter的章节名, 如果为None, 则使用从文本中获取的 title标签 的内容作为章节名.
-            strict : html 清洗的标准是否严格，严格（True）则需要进行过滤，非严格（False）模式直接使用原 html
+            strict (Option[bool]): html 清洗的标准是否严格，严格（True）则需要进行过滤，非严格（False）模式直接使用原 html
+            local (Option[bool]): html中的图片、CSS等是否为本地资源，True表示本地资源直接从本地复制而不去网络上下载，False表示网络资源
         Returns:
             Chapter: 一个Chapter对象, 其内容是给定文本的内容.
         """
@@ -406,7 +414,7 @@ class ChapterFactory(object):
                     raise ValueError
             except (IndexError, ValueError):
                 title = 'Ebook Chapter'
-        return Chapter(clean_xhtml_string, title, url)
+        return Chapter(clean_xhtml_string, title, url, local)
 
 
 create_chapter_from_url = ChapterFactory().create_chapter_from_url
