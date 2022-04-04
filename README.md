@@ -8,7 +8,7 @@
 [![license](https://img.shields.io/github/license/dfface/xml2epub)](https://pypi.org/project/xml2epub/)
 ![PyPI - Downloads](https://img.shields.io/pypi/dd/xml2epub)
 
-Batch convert multiple web pages into one e-book by URL, xml string, etc.
+Batch convert multiple web pages, html files or images into one e-book.
 
 Features:
 * Automatically generate cover: If the `<title>` text in html is one of [COVER_TITLE_LIST](./xml2epub/constants.py), 
@@ -77,7 +77,7 @@ If we cannot infer the cover image from html string, we will generate one. The r
   * strict (Option[boolean]): Whether to perform strict page cleaning, which will remove inline styles, insignificant attributes, etc., generally True. When False, you can enter an image link and specify title, which is helpful for custom cover image.
   * local (Option[boolean]):  Whether to use local resources, which means that all images and css files in html have been saved locally, and the resources will be copied directly using the file path in html instead of getting them from the Internet.
 * `create_chapter_from_string(html_string, url=None, title=None, strict=True, local=False)`: Create a Chapter object from a string. The principle of the above two methods is to first obtain the html or xml string, and then call this method. 
-  * html_string (string): html or xhtml string.
+  * html_string (string): **html** or **xhtml** string or **image** url (with `strict=False`) or **image** path (with `strict=False` and `local=True`). When it is an image, if there is no `title` field or the `title` field is any one of [`COVER_TITLE_LIST`](./xml2epub/constants.py), such as `cover`, then the image will be used as the cover.
   * url (Option[string]): The url used to infer the chapter title. It is recommended to bring the `url` parameter, which helps to identify relative links in the web page.
   * title (Option[string]): The chapter name of the chapter, if None, the content of the title tag obtained from the web file will be used as the chapter name.
   * strict (Option[boolean]): Whether to perform strict page cleaning, which will remove inline styles, insignificant attributes, etc., generally True.
