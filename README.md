@@ -65,18 +65,18 @@ If we cannot infer the cover image from html string, we will generate one. The r
 
 ## API
 
-* `create_chapter_from_file(file_name, url=None, title=None, strict=True)`: Create a Chapter object from an html or xhtml file.
+* `create_chapter_from_file(file_name, url=None, title=None, strict=True, local=False)`: Create a Chapter object from an html or xhtml file.
   * file_name (string): The filename containing the html or xhtml content of the created chapter.
   * url (Option[string]): The url used to infer the chapter title. It is recommended to bring the `url` parameter, which helps to identify relative links in the web page.
   * title (Option[string]): The chapter name of the chapter, if None, the content of the title tag obtained from the web file will be used as the chapter name.
   * strict (Option[boolean]): Whether to perform strict page cleaning, which will remove inline styles, insignificant attributes, etc., generally True.
   * local (Option[boolean]):  Whether to use local resources, which means that all images and css files in html have been saved locally, and the resources will be copied directly using the file path in html instead of getting them from the Internet.
-* `create_chapter_from_url(url, title=None, strict=True)`: Create a Chapter object by extracting webpage from given url.
+* `create_chapter_from_url(url, title=None, strict=True, local=False)`: Create a Chapter object by extracting webpage from given url.
   * url (string): website link. It is recommended to bring the `url` parameter, which helps to identify relative links in the web page.
   * title (Option[string]): The chapter name of the chapter, if None, the content of the title tag obtained from the web file will be used as the chapter name.
   * strict (Option[boolean]): Whether to perform strict page cleaning, which will remove inline styles, insignificant attributes, etc., generally True. When False, you can enter an image link and specify title, which is helpful for custom cover image.
   * local (Option[boolean]):  Whether to use local resources, which means that all images and css files in html have been saved locally, and the resources will be copied directly using the file path in html instead of getting them from the Internet.
-* `create_chapter_from_string(html_string, url=None, title=None, strict=True)`: Create a Chapter object from a string. The principle of the above two methods is to first obtain the html or xml string, and then call this method. 
+* `create_chapter_from_string(html_string, url=None, title=None, strict=True, local=False)`: Create a Chapter object from a string. The principle of the above two methods is to first obtain the html or xml string, and then call this method. 
   * html_string (string): html or xhtml string.
   * url (Option[string]): The url used to infer the chapter title. It is recommended to bring the `url` parameter, which helps to identify relative links in the web page.
   * title (Option[string]): The chapter name of the chapter, if None, the content of the title tag obtained from the web file will be used as the chapter name.
@@ -103,7 +103,7 @@ If we cannot infer the cover image from html string, we will generate one. The r
 
 ## Tips
 
-* If you want to add a cover image yourself, use the `create_chapter_from_string` method, then assign `html_string` to the image URL (e.g. `https://www.xxx.com/xxx.png`) and keep the `strict=False` parameter. Or assign `html_string` to the local image file path (e.g. `./xxx.png`) and keep the `local=True` and `strict=False` parameters.
+* If you want to add a cover image yourself, use the `create_chapter_from_string` method, then assign `html_string` to the image URL (e.g. `https://www.xxx.com/xxx.png`) and keep the `strict=False` parameter. Or assign `html_string` to the local image file path (e.g. `./xxx.png`) and keep the `local=True` and `strict=False` parameters. And it's better to add a `title='Cover'` parameter.
 * If you want to clean the web content yourself, first use the crawler to get the html string, then use the exposed `html_clean` method (it is recommended to add the values of `tag_clean_list`, `class_clean_list` and `url`) and assign the output to the `create_chapter_from_string` method `html_string` parameter while keeping `strict=False`.
 * No matter which method, when using `create_chapter_*` and `strict=False` , it is recommended to bring the `url` parameter, which helps to identify relative links in the web page.
 * Whenever you use the `html_clean` method, it is recommended to include the `help_url` parameter, which helps to identify relative links in web pages.

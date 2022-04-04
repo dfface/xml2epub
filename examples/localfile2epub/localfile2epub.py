@@ -7,7 +7,7 @@ import xml2epub
 ## create an empty eBook
 book = xml2epub.Epub("My New E-book Name")
 ## create chapters by file
-chapter0 = xml2epub.create_chapter_from_string("./local_file_example/03-06-OdnY0A.png", strict=False, local=True)  # local image as cover
+chapter0 = xml2epub.create_chapter_from_string("./local_file_example/03-06-OdnY0A.png", strict=False, local=True, title='Cover')  # local image as cover
 chapter1 = xml2epub.create_chapter_from_file("local_file_example.html", local=True)  # images in the html are local resources
 ## add chapters to your eBook
 book.add_chapter(chapter0)
