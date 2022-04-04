@@ -361,6 +361,12 @@ class Epub(object):
             """
             向epub中添加默认的cover.
             """
+            # 查看是否已经有自定义的封面
+            if self.opf.non_chapter_parameters is not None and 'cover_image' in self.opf.non_chapter_parameters.keys():
+                # 上面默认的图片路径设置的是 'img/cover.jpg'
+                cover_image = self.opf.non_chapter_parameters['cover_image']
+                if 'link' in cover_image.keys() and cover_image['link'] != 'img/cover.jpg':
+                    return
             cover = get_cover_image(title=self.title, author=self.creator, publisher=self.publisher)
             cover.save(os.path.join(self.OEBPS_DIR, 'img/cover.jpg'))
 
