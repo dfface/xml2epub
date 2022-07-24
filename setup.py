@@ -5,10 +5,10 @@ with open("README.md", "r", encoding='utf-8') as fh:
 
 setup(
     name='xml2epub',
-    version='2.6',
+    version='2.6.1',
     author='dfface',
     author_email='dfface@sina.com',
-    keywords="convert html url image export epub",
+    keywords="convert html url image export epub pypub html2epub",
     description='Batch convert multiple web pages, html files or images into one e-book.',
     long_description=long_description,
     long_description_content_type="text/markdown",
