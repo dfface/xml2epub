@@ -398,7 +398,7 @@ class Epub(object):
             return epub_name_with_path + '.zip'
 
         def turn_zip_into_epub(zip_archive):
-            epub_full_name = zip_archive.strip[:-4] + '.epub'
+            epub_full_name = zip_archive[:-4] + '.epub'
             try:
                 os.remove(epub_full_name)
             except OSError:
