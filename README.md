@@ -121,5 +121,5 @@ If we cannot infer the cover image from html string, we will generate one. The r
 4. If you choose to get the html string yourself and clean it up yourself, you can follow these steps:
    1. Use crawler technology to obtain html strings, such as `requests.get(url).text`.
    2. Use the `html_clean` method we expose to clean up the string, e.g. `html_clean(html_string, tag_clean_list=['sidebar'])`. Or you can write your own methods to sanitize strings, all just to get clean strings, whatever you want.
-   3. Using the `create_chapter_from_string(html_string, strict=False)` method to generate the Chapter object, pay special attention to the parameter `` to be set to False, which means that our internal cleaning strategy will be skipped.
+   3. Using the `create_chapter_from_string(html_string, strict=False)` method to generate the Chapter object, pay special attention to the parameter `strict` to be set to False, which means that our internal cleaning strategy will be skipped.
    4. After that, you can generate epub according to the basic usage. See [vuepress2epub.py](examples/vuepress2epub/vuepress2epub.py) as an example.
