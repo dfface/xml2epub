@@ -5,7 +5,7 @@ with open("README.md", "r", encoding='utf-8') as fh:
 
 setup(
     name='xml2epub',
-    version='2.6.2',
+    version='2.6.3',
     author='dfface',
     author_email='dfface@sina.com',
     keywords="convert html url image export epub pypub html2epub",
@@ -20,6 +20,7 @@ setup(
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3 :: Only",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
@@ -29,6 +30,6 @@ setup(
         'jinja2',
         'requests',
         'lxml',
-        'pillow'
+        'pillow==9.5'
     ]
 )
