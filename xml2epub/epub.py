@@ -348,7 +348,7 @@ class Epub(object):
         self._increase_current_chapter_number()
         self.chapters.append(c)
 
-    def create_epub(self, output_directory, epub_name=None):
+    def create_epub(self, output_directory, epub_name=None, absolute_location=None):
         """
         从该对象中创建epub文件.
 
@@ -356,6 +356,10 @@ class Epub(object):
             output_directory (str): Directory to output the epub file to
             epub_name (Option[str]): The file name of your epub. This should not contain
                 .epub at the end. If this argument is not provided, defaults to the title of the epub.
+            absolute_location (Option[str]): The absolute path and file name of the file, excluding the file type suffix (do not contain .epub at the end).
+                If not passed, the file location is `${current working path}/${output_directory}/${epub_name}.epub`. 
+                If this parameter is passed, the file will be saved at the absolute path specified by the parameter. 
+                Please make sure you have write permission to the location and the path is legal.
         """
         def create_cover():
             """
@@ -390,6 +394,8 @@ class Epub(object):
             epub_file_name = ''.join(
                 [c for c in epub_file_name if c.isalpha() or c.isdigit() or c == ' ']).rstrip()
             epub_name_with_path = os.path.join(output_directory, epub_file_name)
+            if absolute_location is not None:
+                epub_name_with_path = absolute_location
             try:
                 os.remove(os.path.join(epub_name_with_path, '.zip'))
             except OSError:

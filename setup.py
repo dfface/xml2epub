@@ -26,10 +26,10 @@ setup(
         "Operating System :: OS Independent",
     ],
     install_requires=[
-        'beautifulsoup4',
-        'jinja2',
-        'requests',
-        'lxml',
+        'beautifulsoup4==4.10.0',
+        'jinja2==3.1.2',
+        'requests==2.27.1',
+        'lxml==4.8.0',
         'pillow==9.5'
     ]
 )
