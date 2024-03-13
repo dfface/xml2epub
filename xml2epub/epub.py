@@ -354,8 +354,9 @@ class Epub(object):
 
         Parameters:
             output_directory (str): Directory to output the epub file to
-            epub_name (Option[str]): The file name of your epub. This should not contain
-                .epub at the end. If this argument is not provided, defaults to the title of the epub.
+            epub_name (Option[str]): The file name of your epub. Each character of the file name must be printable and pass the `str.isprintable()` test.
+             Unprintable characters will be filtered. This should not contain .epub at the end. 
+             If this argument is not provided, defaults to the title of the epub.
             absolute_location (Option[str]): The absolute path and file name of the file, excluding the file type suffix (do not contain .epub at the end).
                 If not passed, the file location is `${current working path}/${output_directory}/${epub_name}.epub`. 
                 If this parameter is passed, the file will be saved at the absolute path specified by the parameter. 
@@ -392,7 +393,7 @@ class Epub(object):
             if epub_file_name is None:
                 epub_file_name = self.title
             epub_file_name = ''.join(
-                [c for c in epub_file_name if c.isalpha() or c.isdigit() or c == ' ']).rstrip()
+                [c for c in epub_file_name if c.isprintable()]).rstrip()
             epub_name_with_path = os.path.join(output_directory, epub_file_name)
             if absolute_location is not None:
                 epub_name_with_path = absolute_location
