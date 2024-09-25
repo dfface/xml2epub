@@ -30,6 +30,6 @@ setup(
         'jinja2',
         'requests',
         'lxml',
-        'pillow==9.5'
+        'pillow'
     ]
 )
