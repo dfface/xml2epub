@@ -93,7 +93,7 @@ If we cannot infer the cover image from html string, we will generate one. The r
   * epub_dir(Option[str]): The path of intermediate file, the system's temporary file path is used by default, or you can specify it yourself.
 * Epub object  `add_chapter(chapter_object)`: Add Chapter object to Epub.
   * chapter_object (Chapter object): Use the three methods of creating a chapter object to get the object.
-* Epub object  `create_epub(output_directory, epub_name=None)`: Create an epub file from the Epub object.
+* Epub object  `create_epub(output_directory, epub_name=None, absolute_location=None)`: Create an epub file from the Epub object.
   * output_directory (str): Directory to output the epub file to.
   * epub_name (Option[str]): The file name of your epub. Each character of the file name must be printable and pass the `str.isprintable()` test. Unprintable characters will be filtered. This should not contain .epub at the end. If this argument is not provided, defaults to the title of the epub.
   * absolute_location (Option[str]): The absolute path and file name of the file, excluding the file type suffix (do not contain .epub at the end). If not passed, the file location is `${current working path}/${output_directory}/${epub_name}.epub`. If this parameter is passed, the file will be saved at the absolute path specified by the parameter. Please make sure you have write permission to the location and the path is legal.
