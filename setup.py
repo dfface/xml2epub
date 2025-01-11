@@ -30,6 +30,7 @@ setup(
         'jinja2',
         'requests',
         'lxml',
-        'pillow'
+        'pillow',
+        'standard-imghdr'
     ]
 )
