@@ -39,8 +39,8 @@ $ pip install xml2epub
 ```python
 import xml2epub
 
-## create an empty eBook
-book = xml2epub.Epub("My New E-book Name")
+## create an empty eBook, with toc located at the beginning
+book = xml2epub.Epub("My New E-book Name", toc_location="beginning")
 ## create chapters by url
 #### custom your own cover image
 chapter0 = xml2epub.create_chapter_from_string("https://cdn.jsdelivr.net/gh/dfface/img0@master/2022/02-10-0R7kll.png", title='cover', strict=False)
@@ -84,13 +84,17 @@ If we cannot infer the cover image from html string, we will generate one. The r
   * title (Option[string]): The chapter name of the chapter, if None, the content of the title tag obtained from the web file will be used as the chapter name.
   * strict (Option[boolean]): Whether to perform strict page cleaning, which will remove inline styles, insignificant attributes, etc., generally True.
   * local (Option[boolean]):  Whether to use local resources, which means that all images and css files in html have been saved locally, and the resources will be copied directly using the file path in html instead of getting them from the Internet.
-* `Epub(title, creator='dfface', language='en', rights='', publisher='dfface', epub_dir=None)`: Constructor method to create Epub object.Mainly used to add book information and all chapters and generate epub file.
+* `Epub(title, creator='dfface', language='en', rights='', publisher='dfface', epub_dir=None, toc_location='end')`: Constructor method to create Epub object.Mainly used to add book information and all chapters and generate epub file.
   * title (str): The [title](http://kb.daisy.org/publishing/docs/epub/title.html) of the epub.
   * creator (Option[str]): The [author](http://kb.daisy.org/publishing/docs/html/dpub-aria/doc-credit.html) of the epub.
   * language (Option[str]): The [language](http://kb.daisy.org/publishing/docs/epub/language.html) of the epub.
   * rights (Option[str]): The [copyright](http://kb.daisy.org/publishing/docs/html/dpub-aria/doc-credit.html) of the epub.
   * publisher (Option[str]): The [publisher](http://kb.daisy.org/publishing/docs/html/dpub-aria/doc-credit.html) of the epub.
   * epub_dir(Option[str]): The path of intermediate file, the system's temporary file path is used by default, or you can specify it yourself.
+  * toc_location (Option[str]): The location of ToC file, default to `end`. It has 3 options:  
+    * `beginning`: It likes **Toc**, chapter1, chapter2, ..., chapterLast.
+    * `afterFirstChapter`: It likes Chapter1, **Toc**, chapter2, chapter3, ..., chapterLast. The Chapter1 should be a cover chapter.
+    * `end`: default option. It likes chapter1, chapter2, ..., chapterLast, **Toc**.
 * Epub object  `add_chapter(chapter_object)`: Add Chapter object to Epub.
   * chapter_object (Chapter object): Use the three methods of creating a chapter object to get the object.
 * Epub object  `create_epub(output_directory, epub_name=None, absolute_location=None)`: Create an epub file from the Epub object.

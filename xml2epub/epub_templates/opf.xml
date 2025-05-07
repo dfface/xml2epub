@@ -33,10 +33,23 @@
     {%- endfor %}
   </manifest>
   <spine toc="ncx">
+
+    {%- if toc_location == 'beginning' %}
+        <itemref idref="toc"/>
+    {%- endif %}
+
     {%- for chapter in chapters %}
-        <itemref idref="{{ chapter.id }}"/>
+        {%- if toc_location == 'afterFirstChapter' and loop.first %}
+          <itemref idref="{{ chapter.id }}"/>
+          <itemref idref="toc"/>
+        {%- else %}
+          <itemref idref="{{ chapter.id }}"/>
+        {%- endif %}
     {%- endfor %}
-    <itemref idref="toc"/>
+
+    {%- if toc_location == 'end' %}
+        <itemref idref="toc"/>
+    {%- endif %}
   </spine>
   <guide>
     <reference href="{{ cover_image.link }}" title="Cover" type="cover"/>
