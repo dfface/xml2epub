@@ -12,7 +12,7 @@ Batch convert web pages, HTML files or images to a single e-book.
 
 Features:
 
-* Auto-generate cover: Uses matching `<title>` text (per [COVER_TITLE_LIST](./xml2epub/constants.py)) or a random "O'Reilly"-style default.
+* Auto-generate cover: Uses matching `<title>` text (per [COVER_TITLE_LIST](./xml2epub/constants.py)) or a random generated cover default.
 * Auto-extract core content: Filters HTML to retain key elements (see [SUPPORTED_TAGS](./xml2epub/constants.py)).
 
 ## ToC
