@@ -43,7 +43,7 @@ def get_cover_image(title: str, author: str, publisher: str) -> Image:
     
     # 计算标题区域
     title_area_height = 500
-    title_area_top = COVER_HEIGHT * 0.4
+    title_area_top = COVER_HEIGHT * 0.35
     title_area = (
         CONTENT_MARGIN, 
         title_area_top,
@@ -686,13 +686,13 @@ def draw_modern_title(draw, title, title_area, text_color, bg_color):
         # 文字阴影（增强可读性）
         shadow_color = (0, 0, 0, 80) if text_color == (255, 255, 255) else (255, 255, 255, 80)
         draw.text(
-            (title_area[0] + title_width/2 + 2, y_pos + 70  + 2),
+            (title_area[0] + title_width/2 + 2, y_pos + 60  + 2),
             text=line, anchor='mm', fill=shadow_color, font=title_font
         )
         
         # 主要文字
         draw.text(
-            (title_area[0] + title_width/2, y_pos + 70),
+            (title_area[0] + title_width/2, y_pos + 60),
             text=line, anchor='mm', fill=text_color, font=title_font
         )
     
