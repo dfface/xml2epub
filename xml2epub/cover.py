@@ -5,7 +5,6 @@
 import math
 import random
 from datetime import datetime
-from typing import Tuple, List
 
 # Third party modules
 from PIL import Image, ImageFont, ImageDraw, ImageFilter
@@ -22,7 +21,7 @@ def textsize(text, font):
 
 def get_cover_image(title: str, author: str, publisher: str) -> Image:
     """
-    生成现代化的电子书封面 - 完整版
+    生成现代化的电子书封面
     """
     # 封面尺寸
     COVER_WIDTH, COVER_HEIGHT = 1000, 1400
@@ -746,7 +745,7 @@ def split_long_word(word, font, max_width):
     return lines
 
 def draw_modern_author(draw, author, author_area, text_color, title_font_size):
-    """绘制现代化作者信息 - 简化设计，增大字体"""
+    """绘制现代化作者信息"""
     # 作者字体大小为标题的一半，但限制在合理范围内
     author_font_size = max(48, min(48, title_font_size // 2))
     author_font = ImageFont.truetype(COVER_FONT_PATH, author_font_size)
