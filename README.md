@@ -27,11 +27,10 @@ Features:
 
 ## How to install
 
-`xml2epub` is available on pypi
-https://pypi.org/project/xml2epub/
+`xml2epub` is available on pypi: https://pypi.org/project/xml2epub/
 
-```
-$ pip install xml2epub
+```bash
+pip3 install xml2epub
 ```
 
 ## Basic Usage
@@ -39,8 +38,8 @@ $ pip install xml2epub
 ```python
 import xml2epub
 
-## create an empty eBook, with toc located at the beginning
-book = xml2epub.Epub("My New E-book Name", toc_location="beginning")
+## create an empty eBook, with toc located after cover
+book = xml2epub.Epub("My New E-book Name", toc_location="afterFirstChapter")
 ## create chapters by url
 #### custom your own cover image
 chapter0 = xml2epub.create_chapter_from_string("https://cdn.jsdelivr.net/gh/dfface/img0@master/2022/02-10-0R7kll.png", title='cover', strict=False)
@@ -55,13 +54,13 @@ book.add_chapter(chapter2)
 book.create_epub("Your Output Directory")
 ```
 
-After waiting for a while, if no error is reported, the following "My New E-book Name.epub" file will be generated in "Your Output Directory":
+After a short wait (no errors), "My New E-book Name.epub" will be generated in "Your Output Directory":
 
 ![The generated epub file](https://cdn.jsdelivr.net/gh/dfface/img0@master/2022/02-09-Guz0bl.png)
 
-For more **examples**, see: [examples](./examples) directory.
+For more **examples**, check the [examples](./examples) directory.
 
-If we cannot infer the cover image from html string, we will generate one. The randomly generated cover image is a similar "O'Reilly" style: 
+If no cover is inferred from the HTML, a random "O'Reilly"-style cover is generated.
 
 ![The generated cover image](https://cdn.jsdelivr.net/gh/dfface/img0@master/2022/02-10-0R7kll.png)
 

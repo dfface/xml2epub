@@ -5,7 +5,7 @@ with open("README.md", "r", encoding='utf-8') as fh:
 
 setup(
     name='xml2epub',
-    version='2.6.8',
+    version='2.6.9',
     author='dfface',
     author_email='dfface@sina.com',
     keywords="convert html url image export epub pypub html2epub",
@@ -14,7 +14,7 @@ setup(
     long_description_content_type="text/markdown",
     url='https://github.com/dfface/xml2epub',
     packages=['xml2epub'],
-    package_data={'xml2epub': ['epub_templates/*', 'epub_cover/*', 'epub_cover/animals/*']},
+    package_data={'xml2epub': ['epub_templates/*', 'epub_cover/*']},
     classifiers=[
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
