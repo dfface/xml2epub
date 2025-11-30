@@ -8,12 +8,12 @@
 [![license](https://img.shields.io/github/license/dfface/xml2epub)](https://pypi.org/project/xml2epub/)
 ![PyPI - Downloads](https://img.shields.io/pypi/dd/xml2epub)
 
-Batch convert multiple web pages, html files or images into one e-book.
+Batch convert web pages, HTML files or images to a single e-book.
 
 Features:
-* Automatically generate cover: If the `<title>` text in html is one of [COVER_TITLE_LIST](./xml2epub/constants.py), 
-then the cover will be added automatically, otherwise the default cover will be generated. We will randomly generate the cover image with a similar "O'Reilly" style.
-* Automatically obtain the core content of the article: we filter the obtained html string and retain the core content. See [SUPPORTED_TAGS](./xml2epub/constants.py) for a list of tags reserved in html.
+
+* Auto-generate cover: Uses matching `<title>` text (per [COVER_TITLE_LIST](./xml2epub/constants.py)) or a random "O'Reilly"-style default.
+* Auto-extract core content: Filters HTML to retain key elements (see [SUPPORTED_TAGS](./xml2epub/constants.py)).
 
 ## ToC
 
