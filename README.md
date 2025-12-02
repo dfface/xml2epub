@@ -1,7 +1,7 @@
 # xml2epub
 
 ![GitHub Repo stars](https://img.shields.io/github/stars/dfface/xml2epub)
-![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/dfface/xml2epub/.github/workflows/pypi.yml?branch=main)
+![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/dfface/xml2epub/.github/workflows/pypi.yml)
 [![python](https://img.shields.io/pypi/pyversions/xml2epub)](https://pypi.org/project/xml2epub/)
 [![pypi](https://img.shields.io/pypi/v/xml2epub)](https://pypi.org/project/xml2epub/)
 [![wheel](https://img.shields.io/pypi/wheel/xml2epub)](https://pypi.org/project/xml2epub/)
