@@ -78,7 +78,7 @@ If no cover is inferred from the HTML, a random cover is generated.
 
 #### `Epub(title)`
 
-`Epub(title, creator='dfface', language='en', rights='', publisher='dfface', epub_dir=None, toc_location='end')`
+`Epub(title, creator='dfface', language='en', rights='', publisher='dfface/xml2epub', epub_dir=None, toc_location='end')`
 
 Creates Epub object (adds book info/chapters, generates EPUB file).
 
@@ -161,7 +161,7 @@ Exposed internal default clean method for easy customization.
 * For `create_chapter_*` + `strict=False`: Recommend `url` (resolves relative links).
 * For `html_clean`: Recommend `help_url` (resolves relative links).
 * Post-EPUB generation: Use [Calibre](https://calibre-ebook.com/) to convert to standard EPUB/mobi/azw3 (fix compatibility) or edit/adjust styles.
-* Local images/CSS: Set `local=True` in `create_chapter_*` – program copies local resources instead of fetching online.
+* Local images/CSS/resources: Set `local=True` in `create_chapter_*` – program copies local resources instead of fetching online.
 
 ## FAQ
 
