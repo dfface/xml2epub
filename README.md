@@ -161,6 +161,7 @@ Exposed internal default clean method for easy customization.
 * For `create_chapter_*` + `strict=False`: Recommend `url` (resolves relative links).
 * For `html_clean`: Recommend `help_url` (resolves relative links).
 * Post-EPUB generation: Use [Calibre](https://calibre-ebook.com/) to convert to standard EPUB/mobi/azw3 (fix compatibility) or edit/adjust styles.
+* If the reading effect of the generated EPUB e-books is unsatisfactory on traditional readers such as Calibre, you can consider using [epub-browser](https://github.com/dfface/epub-browser) to read the generated EPUB e-books in your browser.
 * Local images/CSS/resources: Set `local=True` in `create_chapter_*` – program copies local resources instead of fetching online.
 
 ## FAQ
