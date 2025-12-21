@@ -181,4 +181,4 @@ Set `strict=False` in `create_chapter_from_string` to skip internal cleaning.
    1. Get HTML string via crawler (e.g., `requests.get(url).text`).
    2. Clean it with exposed `html_clean` (e.g., `html_clean(html_string, tag_clean_list=['sidebar'])`) or custom methods.
    3. Generate Chapter via `create_chapter_from_string(html_string, strict=False)` (set `strict=False` to skip internal cleaning).
-   4. Generate EPUB per basic usage (see example: [vuepress2epub.py](examples/vuepress2epub/vuepress2epub.py)).
+   4. Generate EPUB per basic usage (see example: [hugo2epub.py](examples/hugo2epub/hugo2epub.py)).
