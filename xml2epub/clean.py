@@ -75,7 +75,7 @@ def create_html_from_fragment(tag):
 def clean(input_string, help_url=None, title=None,
           tag_dictionary=constants.SUPPORTED_TAGS,
           tag_clean_list=constants.TAG_DELETE_LIST,
-          class_list=constants.CLASS_INCLUDE_LIST):
+          class_clean_list=constants.CLASS_DELETE_LIST):
     """
     Sanitizes HTML. Tags not contained as keys in the tag_dictionary input are
     removed, and child nodes are recursively moved to parent of removed node.
@@ -90,7 +90,7 @@ def clean(input_string, help_url=None, title=None,
             isn't contained, it will be removed. By default, this is set to
             use the supported tags and attributes for the Amazon Kindle,
             as found at https://kdp.amazon.com/help?topicId=A1JPUWCSD6F59O
-        class_list (Option[list]): 清理class属性中可能包含该列表中关键字的所有元素及其子元素
+        class_clean_list (Option[list]): 清理class属性中可能包含该列表中关键字的所有元素及其子元素
         tag_clean_list (Option[list]): 清理该列表中包含的所有 tag 元素及其子元素
 
     Returns:
@@ -105,15 +105,14 @@ def clean(input_string, help_url=None, title=None,
         raise TypeError
     # 使用 lxml 更为准确和严格，默认不保存 link 元素，可自定义删除的tag
     root = BeautifulSoup(input_string, 'lxml')
-    title = root.find('title')  # 暴露出该方法后，防止后面直接提取article的时候title丢失，该方法会执行两次
     # 如果能找到 article 元素，直接提取该元素
     article_tag = root.find_all('article')
     if article_tag:
-        root = article_tag[0]
-        if title:
-            root.insert_before(title)
+        body = root.find('body')
+        body.clear()
+        body.append(article_tag[0])
     # 删除 class_list 中的元素及其子元素，例如导航栏、边栏等元素及其子元素
-    for i in class_list:
+    for i in class_clean_list:
         to_delete = root.find_all(lambda tag: tag.has_attr('class') and str(tag['class']).find(i) != -1)
         for td in to_delete:
             td.extract()
@@ -123,21 +122,22 @@ def clean(input_string, help_url=None, title=None,
         for td in to_delete:
             td.extract()
     # 仅保留 tag_dictionary 中的元素，子元素可保存
-    stack = root.find_all(True, recursive=False)
-    while stack:
-        current_node = stack.pop()
-        child_node_list = current_node.find_all(True, recursive=False)
-        if current_node.name not in tag_dictionary.keys():
-            parent_node = current_node.parent
-            current_node.extract()
-            for n in child_node_list:
-                parent_node.append(n)
-        else:
-            attribute_dict = current_node.attrs
-            for attribute in list(attribute_dict.keys()):
-                if attribute not in tag_dictionary[current_node.name]:
-                    attribute_dict.pop(attribute)
-        stack.extend(child_node_list)
+    if tag_dictionary:
+        stack = root.find_all(True, recursive=False)
+        while stack:
+            current_node = stack.pop()
+            child_node_list = current_node.find_all(True, recursive=False)
+            if current_node.name not in tag_dictionary.keys():
+                parent_node = current_node.parent
+                current_node.extract()
+                for n in child_node_list:
+                    parent_node.append(n)
+            else:
+                attribute_dict = current_node.attrs
+                for attribute in list(attribute_dict.keys()):
+                    if attribute not in tag_dictionary[current_node.name]:
+                        attribute_dict.pop(attribute)
+            stack.extend(child_node_list)
     # 删除无用的 <link>
     for i in root.find_all('link'):
         if (i.has_attr('rel') and i['rel'][0] == 'stylesheet') or \
@@ -274,7 +274,7 @@ def html_to_xhtml(html_unicode_string):
 
 def html_clean(input_string, help_url=None,
                tag_clean_list=constants.TAG_DELETE_LIST,
-               class_clean_list=constants.CLASS_INCLUDE_LIST,
+               class_clean_list=constants.CLASS_DELETE_LIST,
                tag_dictionary=constants.SUPPORTED_TAGS):
     """
     Sanitizes HTML / XML. Tags not contained as keys in the tag_dictionary input are
@@ -286,7 +286,7 @@ def html_clean(input_string, help_url=None,
         1. Generally, you only need to delete the tags you don't need, you only need to customize the tag_clean_list,
         and the others can be kept by default.
         2. tag_dictionary defines all tags and their classes that need to be saved, you can see what the default values
-         are.
+         are. When set to None, it retains all tags except those specified in tag_clean_list.
         3. tag_clean_list defines all tags that need to be deleted. Note that the entire tag and its sub-tags will be
          deleted directly here.
         4. class_list defines all tags containing the content of the class that need to be deleted, that is, as long
@@ -314,5 +314,5 @@ def html_clean(input_string, help_url=None,
     Raises:
         TypeError: Raised if input_string isn't a unicode string or string.
     """
-    html_string = clean(input_string, help_url=help_url, tag_dictionary=tag_dictionary, tag_clean_list=tag_clean_list, class_list=class_clean_list)
+    html_string = clean(input_string, help_url=help_url, tag_dictionary=tag_dictionary, tag_clean_list=tag_clean_list, class_clean_list=class_clean_list)
     return html_to_xhtml(html_string)

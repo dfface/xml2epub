@@ -70,7 +70,7 @@ SINGLETON_TAG_LIST = [
     'param',
     'source',
 ]
-CLASS_INCLUDE_LIST = [
+CLASS_DELETE_LIST = [
     'side'
     'nav',
     'hidden',

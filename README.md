@@ -150,9 +150,9 @@ Exposed internal default clean method for easy customization.
 
 * `input_string` (str): HTML/XML string.
 * `help_url` (Optional[str]): Current chapter URL (resolves relative links).
-* `tag_dictionary` (Optional[dict]): Tags/classes to retain (default: [SUPPORTED_TAGS](./xml2epub/constants.py)).
-* `tag_clean_list` (Optional[list]): Tags to delete (full tag + subtags; default: [TAG_DELETE_LIST](./xml2epub/constants.py)).
-* `class_list` (Optional[list]): Tags to delete (class matches list; full tag + subtags; default: [CLASS_INCLUDE_LIST](./xml2epub/constants.py)).
+* `tag_dictionary` (Optional[dict]): Tags/classes to retain (default: [SUPPORTED_TAGS](./xml2epub/constants.py), can be `None`: **retain all tags** except those specified in `tag_clean_list`).
+* `tag_clean_list` (Optional[list]): Tags to delete (full tag + subtags; default: [TAG_DELETE_LIST](./xml2epub/constants.py)). Preferably set `tag_dictionary` to `None`.
+* `class_clean_list` (Optional[list]): Tags to delete (class matches list; full tag + subtags; default: [CLASS_INCLUDE_LIST](./xml2epub/constants.py)).
 
 ## Tips
 
