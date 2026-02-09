@@ -83,15 +83,11 @@ def clean(input_string, help_url=None, title=None,
     Doctype is set to <!DOCTYPE html>.
 
     Parameters:
-        input_string (basestring): A (possibly unicode) string representing HTML.
-        help_url (Option[str]): 当前页面的 url ，用于辅助替换页面中所有的相对资源
-        tag_dictionary (Option[dict]): A dictionary with tags as keys and
-            attributes as values. This operates as a whitelist--i.e. if a tag
-            isn't contained, it will be removed. By default, this is set to
-            use the supported tags and attributes for the Amazon Kindle,
-            as found at https://kdp.amazon.com/help?topicId=A1JPUWCSD6F59O
-        class_clean_list (Option[list]): 清理class属性中可能包含该列表中关键字的所有元素及其子元素
-        tag_clean_list (Option[list]): 清理该列表中包含的所有 tag 元素及其子元素
+        input_string (str): HTML/XML string.
+        help_url (Optional[str]): Current chapter URL (resolves relative links).
+        tag_dictionary (Optional[dict]): Tags/classes to retain (default: SUPPORTED_TAGS, can be None: retain all tags except those specified in tag_clean_list).
+        tag_clean_list (Optional[list]): Tags to delete (full tag + subtags; default: TAG_DELETE_LIST). Preferably set tag_dictionary to None.
+        class_clean_list (Optional[list]): Tags to delete (class matches list; full tag + subtags; default: CLASS_DELETE_LIST).
 
     Returns:
         str: A (possibly unicode) string representing HTML.

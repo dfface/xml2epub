@@ -334,21 +334,18 @@ class ChapterFactory(object):
 
     def create_chapter_from_url(self, url, title=None, strict=True, local=False):
         """
-        从URL创建chapter对象. 
-        从给定的url中提取网页, 使用clean_function方法对其进行清理, 并将其另存为创建的chpter的内容.
-        在执行任何javascript之前加载的基本网页.
+        Create Chapter by extracting webpage from URL.
 
         Parameters:
-            url (string): 获取chapter对象的网页地址.
-            title (Option[string]): chapter的章节名, 如果为None, 则使用从网页中获取的 title标签 的内容作为章节名.
-            strict(Option[string]): Whether to perform strict page cleaning, which will remove inline styles,
-             insignificant attributes, etc., generally True.
-            local (Option[bool]): html中的图片、CSS等是否为本地资源，True表示本地资源直接从本地复制而不去网络上下载，False表示网络资源
+            url (string): Website link (recommended for resolving relative links).
+            title (Optional[string]): Chapter name (uses HTML <title> if None).
+            strict (Optional[boolean]): Strict page cleaning (removes inline styles/attrs; default True).False allows image links for custom covers.
+            local (Optional[boolean]): Use local resources (copy images/CSS via paths, no online fetch).
         Returns:
-            Chapter: 一个Chapter对象, 其内容是给定url的网页. 
+            Chapter: a Chapter object 
 
         Raises:
-            ValueError: 如果无法连接该url则触发此 Error.
+            ValueError: If network error, then raise Error.
         """
         try:
             request_object = requests.get(
@@ -365,18 +362,16 @@ class ChapterFactory(object):
 
     def create_chapter_from_file(self, file_name, url=None, title=None, strict=True, local=False):
         """
-        从html或xhtml文件创建chapter对象.
-        使用clean_function方法清理文件的内容, 并将其另存为创建的chapter的内容.
+        Create Chapter from HTML/XHTML file.
 
         Parameters:
-            file_name (string): 包含所创建chapter的html或xhtml内容的file_name.
-            url (Option[string]): A url to infer the title of the chapter from
-            title (Option[string]): chapter的章节名, 如果为None, 则使用从网页文件中获取的 title标签 的内容作为章节名.
-            strict (Option[string]) : Whether to perform strict page cleaning, which will remove inline styles,
-             insignificant attributes, etc., generally True.
-            local (Option[bool]): html中的图片、CSS等是否为本地资源，True表示本地资源直接从本地复制而不去网络上下载，False表示网络资源
+            file_name (string): HTML/XHTML file path.
+            url (Optional[string]): Infers title; recommended for relative links.
+            title (Optional[string]): Chapter name (uses HTML <title> if None).
+            strict (Optional[boolean]): Strict cleaning (removes inline styles, trivial attrs); default True.
+            local (Optional[boolean]): Use local resources (copy images/CSS via paths, no online fetch).
         Returns:
-            Chapter: 一个Chapter对象, 其内容是给定html或xhtml文件的内容.
+            Chapter: a Chapter object.
         """
         with codecs.open(file_name, 'r', encoding='utf-8') as f:
             content_string = f.read()
@@ -384,17 +379,16 @@ class ChapterFactory(object):
 
     def create_chapter_from_string(self, html_string, url=None, title=None, strict=True, local=False):
         """
-        从字符串创建chapter对象.
-        使用clean_function方法清理字符串, 并将其另存为创建的chapter的内容.
+        Create Chapter from string (base method for URL/file variants).
 
         Parameters:
-            html_string (string): 创建的chapter的html或xhtml内容.还可能是图片的URL、本地路径，需与title=cover，strict=False配合
-            url (Option[string]): 推断章节标题的url，也是用于辅助替换相对资源的url
-            title (Option[string]): chapter的章节名, 如果为None, 则使用从文本中获取的 title标签 的内容作为章节名.
-            strict (Option[bool]): html 清洗的标准是否严格，严格（True）则需要进行过滤，非严格（False）模式直接使用原 html
-            local (Option[bool]): html中的图片、CSS等是否为本地资源，True表示本地资源直接从本地复制而不去网络上下载，False表示网络资源
+            html_string (string): HTML/XHTML string; or image URL (strict=False) / image path (strict=False + local=True). Image as cover if title is None/ in [COVER_TITLE_LIST] (e.g., cover).
+            url (Optional[string]): Infers title; recommended for relative links.
+            title (Optional[string]): Chapter name (uses HTML <title> if None).
+            strict (Optional[boolean]): Strict page cleaning (removes inline styles/attrs; default True).
+            local (Optional[boolean]): Use local resources (copy images/CSS via paths, no online fetch).
         Returns:
-            Chapter: 一个Chapter对象, 其内容是给定文本的内容.
+            Chapter: a Chapter object.
         """
         if strict is True:
             self.clean_function = clean.clean

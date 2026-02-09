@@ -19,7 +19,7 @@ def textsize(text, font):
     _, _, width, height = draw.textbbox((0, 0), text=text, font=font)
     return width, height
 
-def get_cover_image(title: str, author: str, publisher: str) -> Image:
+def get_cover_image(title: str, author: str, publisher: str, owner: str) -> Image:
     """
     生成现代化的电子书封面
     """
@@ -86,7 +86,7 @@ def get_cover_image(title: str, author: str, publisher: str) -> Image:
     author_color = adjust_color_brightness(text_color, 0.8)
     
     # 绘制顶部横幅
-    draw_top_banner(d, banner_area, cover_color, text_color, author)
+    draw_top_banner(d, banner_area, cover_color, text_color, owner)
     
     # 绘制大标题
     title_font_size = draw_modern_title(d, title, title_area, text_color, cover_color)

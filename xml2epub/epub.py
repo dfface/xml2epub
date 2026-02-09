@@ -259,19 +259,23 @@ class ContentOpf(_EpubFile):
 
 class Epub(object):
     """
-    表示epub的类. 包含添加chapter和输出epub文件.
+    Class for EPUB files: adds chapters and outputs EPUB files
 
     Parameters:
-        title (str): epub的标题.
-        creator (Option[str]): epub的作者.
-        language (Option[str]): epub的语言.
-        rights (Option[str]): epub的版权.
-        publisher (Option[str]): epub的出版商.
-        epub_dir(Option[str]): epub的中间文件生成的路径，默认使用系统的临时文件路径，也可自行指定.
-        toc_location (Option[str]): 目录位置，默认在最后一章后面，也可以指定在第一章前面.
+        title (str): EPUB [title](http://kb.daisy.org/publishing/docs/epub/title.html) (per spec).
+        creator (Optional[str]): EPUB [author](http://kb.daisy.org/publishing/docs/html/dpub-aria/doc-credit.html) (per spec).
+        owner (Optional[str]): The owner of this file—yes, that's you! This affects the text in the top banner if you use our generated cover.
+        language (Optional[str]): EPUB [language](http://kb.daisy.org/publishing/docs/epub/language.html) (per spec).
+        rights (Optional[str]): EPUB [copyright](http://kb.daisy.org/publishing/docs/html/dpub-aria/doc-credit.html) (per spec).
+        publisher (Optional[str]): EPUB [publisher](http://kb.daisy.org/publishing/docs/html/dpub-aria/doc-credit.html) (per spec).
+        epub_dir (Optional[str]): Intermediate file path (default: system temp path).
+        toc_location (Optional[str]): ToC position (default: end; options: beginning/afterFirstChapter/end):
+            beginning: ToC → chapters
+            afterFirstChapter: Chapter1 (cover) → ToC → chapters
+            end: Chapters → ToC
     """
 
-    def __init__(self, title, creator='dfface', language='en', rights='', publisher='dfface/xml2epub', epub_dir=None, toc_location='end'):
+    def __init__(self, title, creator='dfface', language='en', rights='', publisher='dfface/xml2epub', epub_dir=None, toc_location='end', owner='dfface'):
         self._create_directories(epub_dir)
         self.chapters = []
         self.title = title
@@ -280,6 +284,7 @@ class Epub(object):
         except AssertionError:
             raise ValueError('title cannot be empty string')
         self.creator = creator
+        self.owner = owner
         self.language = language
         self.rights = rights
         self.publisher = publisher
@@ -332,12 +337,12 @@ class Epub(object):
 
     def add_chapter(self, c):
         """
-        向epub中添加chapter. 创建各章节的xhtml文件.
+        Add chapters to EPUB, create XHTML files for each chapter
 
         Parameters:
-            c (Chapter): 要添加的chapter.
+            c (Chapter): Chapter object.
         Raises:
-            TypeError: 如果添加的章节类型不对触发此 Error.
+            TypeError: If not a Chapter, then raise Error.
         """
         try:
             assert type(c) == chapter.Chapter
@@ -353,17 +358,12 @@ class Epub(object):
 
     def create_epub(self, output_directory, epub_name=None, absolute_location=None):
         """
-        从该对象中创建epub文件.
+        Create EPUB file
 
         Parameters:
-            output_directory (str): Directory to output the epub file to
-            epub_name (Option[str]): The file name of your epub. Each character of the file name must be printable and pass the `str.isprintable()` test.
-             Unprintable characters will be filtered. This should not contain .epub at the end. 
-             If this argument is not provided, defaults to the title of the epub.
-            absolute_location (Option[str]): The absolute path and file name of the file, excluding the file type suffix (do not contain .epub at the end).
-                If not passed, the file location is `${current working path}/${output_directory}/${epub_name}.epub`. 
-                If this parameter is passed, the file will be saved at the absolute path specified by the parameter. 
-                Please make sure you have write permission to the location and the path is legal.
+            output_directory (str): Output directory for EPUB.
+            epub_name (Optional[str]): EPUB filename (no `.epub` suffix; printable chars only, defaults to `title`).
+            absolute_location (Optional[str]): Absolute path/name (no `.epub` suffix; overrides default `${cwd}/${output_directory}/${epub_name}`.epub; requires write permissions).
         """
         def create_cover():
             """
@@ -375,7 +375,7 @@ class Epub(object):
                 cover_image = self.opf.non_chapter_parameters['cover_image']
                 if 'link' in cover_image.keys() and cover_image['link'] != 'img/cover.jpg':
                     return
-            cover = get_cover_image(title=self.title, author=self.creator, publisher=self.publisher)
+            cover = get_cover_image(title=self.title, author=self.creator, publisher=self.publisher, owner=self.owner)
             cover.save(os.path.join(self.OEBPS_DIR, 'img/cover.jpg'))
 
         def createTOCs_and_ContentOPF():

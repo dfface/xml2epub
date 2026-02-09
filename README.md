@@ -84,6 +84,7 @@ Creates Epub object (adds book info/chapters, generates EPUB file).
 
 * title (str): EPUB [title](http://kb.daisy.org/publishing/docs/epub/title.html) (per spec).
 * creator (Optional[str]): EPUB [author](http://kb.daisy.org/publishing/docs/html/dpub-aria/doc-credit.html) (per spec).
+* owner (Optional[str]): The owner of this file—yes, that's you! This affects the text in the top banner if you use our generated cover.
 * language (Optional[str]): EPUB [language](http://kb.daisy.org/publishing/docs/epub/language.html) (per spec).
 * rights (Optional[str]): EPUB [copyright](http://kb.daisy.org/publishing/docs/html/dpub-aria/doc-credit.html) (per spec).
 * publisher (Optional[str]): EPUB [publisher](http://kb.daisy.org/publishing/docs/html/dpub-aria/doc-credit.html) (per spec).

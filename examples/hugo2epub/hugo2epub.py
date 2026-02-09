@@ -1,5 +1,6 @@
 import xml2epub
 import requests
+from tqdm import tqdm
 from bs4 import BeautifulSoup
 
 def get_html_string(url):
@@ -27,10 +28,11 @@ all_urls = [
     "https://ddia.vonng.com/ch12/",
     "https://ddia.vonng.com/ch13/",
     "https://ddia.vonng.com/glossary/",
+    "https://ddia.vonng.com/colophon/"
 ]
 
-book = xml2epub.Epub("DDIA", creator='Martin Kleppmann')
-for url in all_urls:
+book = xml2epub.Epub("数据密集型应用系统设计（第二版）", creator='Martin Kleppmann')
+for url in tqdm(all_urls):
     html_string = get_html_string(url)
     chapter = xml2epub.create_chapter_from_string(html_string, strict=False)
     book.add_chapter(chapter)
