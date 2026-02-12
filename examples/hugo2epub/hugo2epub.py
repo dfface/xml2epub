@@ -14,16 +14,20 @@ def get_html_string(url):
     return cleaned_string
 
 all_urls = [
+    "https://ddia.vonng.com/preface/",
+    "https://ddia.vonng.com/part-i/",
     "https://ddia.vonng.com/ch1/",
     "https://ddia.vonng.com/ch2/",
     "https://ddia.vonng.com/ch3/",
     "https://ddia.vonng.com/ch4/",
     "https://ddia.vonng.com/ch5/",
+    "https://ddia.vonng.com/part-ii/",
     "https://ddia.vonng.com/ch6/",
     "https://ddia.vonng.com/ch7/",
     "https://ddia.vonng.com/ch8/",
     "https://ddia.vonng.com/ch9/",
     "https://ddia.vonng.com/ch10/",
+    "https://ddia.vonng.com/part-iii/",
     "https://ddia.vonng.com/ch11/",
     "https://ddia.vonng.com/ch12/",
     "https://ddia.vonng.com/ch13/",
@@ -31,7 +35,7 @@ all_urls = [
     "https://ddia.vonng.com/colophon/"
 ]
 
-book = xml2epub.Epub("数据密集型应用系统设计（第二版）", creator='Martin Kleppmann')
+book = xml2epub.Epub("数据密集型应用系统设计\n（第2版）", creator='Martin Kleppmann')
 for url in tqdm(all_urls):
     html_string = get_html_string(url)
     chapter = xml2epub.create_chapter_from_string(html_string, strict=False)
